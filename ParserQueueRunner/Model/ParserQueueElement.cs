@@ -18,6 +18,6 @@ namespace ParserQueueRunner.Model
 		public int ParserQueueId;
 		public string ClientDocNum;
 		public string ClientEmail;
-		public DateTime CreatedTime;
+        public DateTime CreatedTimeUtc;
 	}
 }

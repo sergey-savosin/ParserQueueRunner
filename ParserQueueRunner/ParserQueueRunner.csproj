@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ParserQueueRunner</RootNamespace>
     <AssemblyName>ParserQueueRunner</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <NoWin32Manifest>False</NoWin32Manifest>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
@@ -16,6 +16,7 @@
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -69,8 +70,6 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

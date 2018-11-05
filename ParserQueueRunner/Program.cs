@@ -19,45 +19,66 @@ namespace ParserQueueRunner
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine("Hello World!");
-			
-			processQueue();
-			
-			Console.Write("Press any key to continue . . . ");
-			Console.ReadKey(true);
-		}
-		
-		public static void processQueue()
+			Console.WriteLine("Hello, World!");
+
+            int i = 3;
+            while (i-- > 0)
+            {
+                int cnt = processQueue();
+                if (cnt == 0)
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Обработка элемента очереди ParserQueue
+        /// </summary>
+        /// <returns>Кол-во обработанных элементов очереди</returns>
+        public static int processQueue()
 		{
-			setQueueElementAsProcessed(1);
-			return;
-			
 			var elt = getNewQueueElement_web();
-			printParserQueueElement(elt);
-			
-		}
-		
-		static void printParserQueueElement(ParserQueueElement elt)
+
+            if (elt == null)
+            {
+                Console.WriteLine("No new elements to process.");
+                return 0;
+            }
+
+            try
+            {
+                printParserQueueElement(elt);
+                setQueueElementAsProcessed(elt.ParserQueueId);
+                return 1;
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Error: {0}", exc.Message);
+            }
+            return 0;
+
+        }
+
+        static void printParserQueueElement(ParserQueueElement elt)
 		{
-			Console.WriteLine("Queue Element: QueueId={0}, DocNumber={1}, Email={2}, CreatedTime={3}",
+			Console.WriteLine("[Queue Element]: QueueId={0}, DocNumber={1}, Email={2}, CreatedTimeUtc={3}",
 			                  elt.ParserQueueId,
 			                  elt.ClientDocNum,
 			                  elt.ClientEmail,
-			                  elt.CreatedTime);
+			                  elt.CreatedTimeUtc);
 		}
 		
-		static ParserQueueElement getNewQueueElement_Test()
-		{
-			var elt = new ParserQueueElement()
-			{
-				ParserQueueId = 1,
-				ClientDocNum = "doc#1",
-				ClientEmail = "test@mail.ru",
-				CreatedTime = DateTime.Now
-			};
+		//static ParserQueueElement getNewQueueElement_Test()
+		//{
+		//	var elt = new ParserQueueElement()
+		//	{
+		//		ParserQueueId = 1,
+		//		ClientDocNum = "doc#1",
+		//		ClientEmail = "test@mail.ru",
+		//		CreatedTimeUtc = DateTime.Now
+		//	};
 			
-			return elt;
-		}
+		//	return elt;
+		//}
 		
 		static ParserQueueElement getNewQueueElement_web()
 		{
@@ -73,14 +94,14 @@ namespace ParserQueueRunner
 				
 				using (WebResponse response = request.GetResponse())
 				{
-					Console.WriteLine("Response status = " + ((HttpWebResponse)response).StatusDescription);
+					Console.WriteLine("[Get] Response status = " + ((HttpWebResponse)response).StatusDescription);
 					
 					using (Stream dataStream = response.GetResponseStream())
 					{
 						using (StreamReader reader = new StreamReader(dataStream))
 						{
 							responseFromServer = reader.ReadToEnd();
-							Console.WriteLine(responseFromServer);
+							Console.WriteLine("[Get response]\r\n" + responseFromServer);
 						}
 					}
 				}
@@ -114,9 +135,6 @@ namespace ParserQueueRunner
 				
 				using (var s = request.GetRequestStream())
 				{
-					//s.Write(byteArray, 0, byteArray.Length);
-					//s.Close();
-					
 					using (var sw = new StreamWriter(s))
 					{
 						sw.Write(postDataJson);
@@ -125,7 +143,7 @@ namespace ParserQueueRunner
 				
 				using (WebResponse response = request.GetResponse())
 				{
-					Console.WriteLine("Response status = " + ((HttpWebResponse)response).StatusDescription);
+					Console.WriteLine("[Put] Response status = " + ((HttpWebResponse)response).StatusDescription);
 					
 					using (Stream dataStream = response.GetResponseStream())
 					{
