@@ -7,8 +7,11 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
 using System.Text;
 using Newtonsoft.Json;
 using ParserQueueRunner.Model;
@@ -20,6 +23,10 @@ namespace ParserQueueRunner
 		public static void Main(string[] args)
 		{
 			Console.WriteLine("Hello, World!");
+
+            sendEmailByNewInterface();
+            Console.ReadKey();
+            return;
 
             int i = 3;
             while (i-- > 0)
@@ -161,5 +168,43 @@ namespace ParserQueueRunner
 				Console.WriteLine("Exception: " + ex.Message);
 			}
 		}
+
+        static void sendEmailByNewInterface()
+        {
+            string fileName = @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
+
+            EmailSenderConfig senderConfig = new EmailSenderConfig()
+            {
+                host = "smtp.mail.ru",
+                port = 587,
+                enableSsl = true,
+                username = "savosin_sergey@mail.ru",
+                pasword = "glassma0-"
+            };
+
+            EmailParameters emailParameters = new EmailParameters()
+            {
+                attachments = new List<EmailAttachmentParameters>()
+                {
+                    new EmailAttachmentParameters()
+                    {
+                        FilePath = fileName,
+                        FileName = Path.GetFileName(fileName),
+                        MediaType = MediaTypeNames.Application.Pdf
+                    }
+                },
+                message = new EmailMessageParameters()
+                {
+                    AddressFrom = "savosin_sergey@mail.ru",
+                    AddressTo = "savortone@yandex.ru",
+                    Subject = "--==Тема письма==--",
+                    BodyText = "--==<b> Тело письма </b>==--"
+                }
+            };
+
+            IEmailSender emailSender = new OnlineEmailSender(senderConfig);
+            IEmailComposer emailComposer = new OnlineEmailComposer(emailParameters, emailSender);
+            emailComposer.ComposeAndSendEmail();
+        }
 	}
 }
