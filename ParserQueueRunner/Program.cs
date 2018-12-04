@@ -24,6 +24,13 @@ namespace ParserQueueRunner
 		{
 			Console.WriteLine("Hello, World!");
 
+            string res = CheckExcelAddin();
+            Console.WriteLine("Excel addin check result: {0}", res);
+
+            if (!(res.Equals("Ok")))
+            {
+                return;
+            }
 
             int i = 3;
             while (i-- > 0)
@@ -32,6 +39,23 @@ namespace ParserQueueRunner
                 if (cnt == 0)
                     break;
             }
+        }
+
+        private static string CheckExcelAddin()
+        {
+            IWebPageParser webParser = new ExcelAddinWebPageParser();
+            WebParserConfig parserConfig = new WebParserConfig()
+            {
+                AddinPath = webParser.GetParserPath(),
+                AddinConfigName = "",
+                AddinWorkbookTemplateFile = ""
+            };
+            var parserResult = webParser.ParserCheck(parserConfig);
+            return parserResult.ParserStatus +
+                (
+                string.IsNullOrEmpty(parserResult.ParserError) ? "" :
+                ": " + parserResult.ParserError
+                );
         }
 
         /// <summary>
