@@ -69,9 +69,12 @@
     <Compile Include="Model\EmailSenderConfig.cs" />
     <Compile Include="Model\IEmailComposer.cs" />
     <Compile Include="Model\IEmailSender.cs" />
+    <Compile Include="Model\IParserWebQueue.cs" />
     <Compile Include="Model\ParserQueueElement.cs" />
+    <Compile Include="Model\ParserWebQueueParameters.cs" />
     <Compile Include="OnlineEmailComposer.cs" />
     <Compile Include="OnlineEmailSender.cs" />
+    <Compile Include="OnlineParserWebQueue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

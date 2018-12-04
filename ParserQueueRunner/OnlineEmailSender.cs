@@ -24,7 +24,7 @@ namespace ParserQueueRunner
             {
                 sc.Host = _emailSenderConfig.host;
                 sc.Port = _emailSenderConfig.port;
-                sc.Credentials = new NetworkCredential(_emailSenderConfig.username, _emailSenderConfig.pasword);
+                sc.Credentials = new NetworkCredential(_emailSenderConfig.username, _emailSenderConfig.password);
                 sc.EnableSsl = _emailSenderConfig.enableSsl;
 
                 sc.Send(mailMessage);

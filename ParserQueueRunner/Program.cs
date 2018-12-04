@@ -24,9 +24,6 @@ namespace ParserQueueRunner
 		{
 			Console.WriteLine("Hello, World!");
 
-            sendEmailByNewInterface();
-            Console.ReadKey();
-            return;
 
             int i = 3;
             while (i-- > 0)
@@ -42,19 +39,44 @@ namespace ParserQueueRunner
         /// </summary>
         /// <returns>Кол-во обработанных элементов очереди</returns>
         public static int processQueue()
-		{
-			var elt = getNewQueueElement_web();
-
-            if (elt == null)
-            {
-                Console.WriteLine("No new elements to process.");
-                return 0;
-            }
-
+        {
             try
             {
+                // Создание обработчика очереди
+                ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
+                {
+                    WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
+                    Method = "Get",
+                    Timeout = 20000,
+                    ContentType = "application/json"
+                };
+
+                IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
+
+                // Получение элемента очереди
+                var elt = parserWebQueue.GetNewElement();
+
+                if (elt == null)
+                {
+                    Console.WriteLine("No new elements to process.");
+                    return 0;
+                }
+
+                // Запустить web-parser
+
+
+                // Отправка Email
+                string fileName = @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
+                string emailTo = "savortone@yandex.ru";
+                string docNumber = elt.ClientDocNum + " at " + elt.ClientEmail;
+                DateTime requestDate = elt.CreatedTimeUtc;
+                sendEmailByNewInterface(fileName, emailTo, docNumber, requestDate);
+
                 printParserQueueElement(elt);
-                setQueueElementAsProcessed(elt.ParserQueueId);
+
+                // Пометка элемента очереди как успешно обработанный
+                parserWebQueue.SetQueueElementAsProcessed(elt.ParserQueueId);
+
                 return 1;
             }
             catch (Exception exc)
@@ -73,123 +95,75 @@ namespace ParserQueueRunner
 			                  elt.ClientEmail,
 			                  elt.CreatedTimeUtc);
 		}
-		
-		//static ParserQueueElement getNewQueueElement_Test()
-		//{
-		//	var elt = new ParserQueueElement()
-		//	{
-		//		ParserQueueId = 1,
-		//		ClientDocNum = "doc#1",
-		//		ClientEmail = "test@mail.ru",
-		//		CreatedTimeUtc = DateTime.Now
-		//	};
-			
-		//	return elt;
-		//}
-		
-		static ParserQueueElement getNewQueueElement_web()
-		{
-			const string WEBSERVICE_URL = "https://vprofy.ru/parserqueue/parserqueueendpoint.php";
-			string responseFromServer = "";
-			
-			try
-			{
-				WebRequest request = WebRequest.Create(WEBSERVICE_URL);
-				request.Method = "Get";
-				request.Timeout = 20000;
-				request.ContentType = "application/json";
-				
-				using (WebResponse response = request.GetResponse())
-				{
-					Console.WriteLine("[Get] Response status = " + ((HttpWebResponse)response).StatusDescription);
-					
-					using (Stream dataStream = response.GetResponseStream())
-					{
-						using (StreamReader reader = new StreamReader(dataStream))
-						{
-							responseFromServer = reader.ReadToEnd();
-							Console.WriteLine("[Get response]\r\n" + responseFromServer);
-						}
-					}
-				}
 
-				ParserQueueElement el = JsonConvert.DeserializeObject<ParserQueueElement>(responseFromServer);				
-				return el;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine("Exception: " + ex.Message);
-			}
-			
-			return new ParserQueueElement();
+        //static ParserQueueElement getNewQueueElement_Test()
+        //{
+        //	var elt = new ParserQueueElement()
+        //	{
+        //		ParserQueueId = 1,
+        //		ClientDocNum = "doc#1",
+        //		ClientEmail = "test@mail.ru",
+        //		CreatedTimeUtc = DateTime.Now
+        //	};
+
+        //	return elt;
+        //}
+
+        /// <summary>
+        /// Получить элемент очереди
+        /// </summary>
+        /// <returns>ParserQueueElement</returns>
+        static ParserQueueElement getNewQueueElement_web()
+		{
+            ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
+            {
+                WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
+                Method = "Get",
+                Timeout = 20000,
+                ContentType = "application/json"
+            };
+
+            IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
+            return parserWebQueue.GetNewElement();
+
 		}
 		
 		static void setQueueElementAsProcessed(int ParserQueueId)
 		{
-			const string WEBSERVICE_URL = "https://vprofy.ru/parserqueue/parserqueueendpoint.php";
-			string responseFromServer = "";
-			string postDataJson = "{ \"queuestatusid\" : \"2\" }";
-			try
-			{
-				string strPutUrl = WEBSERVICE_URL + "/parserqueue/" + ParserQueueId;
-				byte[] byteArray = Encoding.UTF8.GetBytes(postDataJson);
-				
-				WebRequest request = WebRequest.Create(strPutUrl);
-				request.Method = "Put";
-				request.Timeout = 20000;
-				request.ContentType = "application/json";
-				request.ContentLength = byteArray.Length;
-				
-				using (var s = request.GetRequestStream())
-				{
-					using (var sw = new StreamWriter(s))
-					{
-						sw.Write(postDataJson);
-					}
-				}
-				
-				using (WebResponse response = request.GetResponse())
-				{
-					Console.WriteLine("[Put] Response status = " + ((HttpWebResponse)response).StatusDescription);
-					
-					using (Stream dataStream = response.GetResponseStream())
-					{
-						using (StreamReader reader = new StreamReader(dataStream))
-						{
-							responseFromServer = reader.ReadToEnd();
-							Console.WriteLine(responseFromServer);
-						}
-					}
-				}
-
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine("Exception: " + ex.Message);
-			}
 		}
 
-        static void sendEmailByNewInterface()
+        /// <summary>
+        /// Составление и отправка Email.
+        /// Что нужно подготовить:
+        /// 0. Настройка для отправки письма:
+        /// - параметры почтового сервера (host, port, ssl)
+        /// - данные отправителя (username, password)
+        /// - email отправителя (может быть равен username по умолчанию)
+        /// 1. Имена файлов для вложения в письмо
+        /// 2. Адрес получателя
+        /// 3. Тема письма
+        /// 4. Данные для тела письма (Номер документа, дата дела...)
+        /// </summary>
+        static void sendEmailByNewInterface(string attachFileName, string AddressTo, string DocNumber, DateTime RequestDate)
         {
-            string fileName = @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
-
             EmailSenderConfig senderConfig = new EmailSenderConfig()
             {
                 host = "smtp.mail.ru",
                 port = 587,
                 enableSsl = true,
                 username = "savosin_sergey@mail.ru",
-                pasword = "glassma0-"
+                password = ""
             };
 
+            string mailSubject = $"--==Документ {DocNumber} от {RequestDate} ==--";
             EmailParameters emailParameters = new EmailParameters()
             {
                 attachments = new List<EmailAttachmentParameters>()
                 {
                     new EmailAttachmentParameters()
                     {
-                        FilePath = fileName,
-                        FileName = Path.GetFileName(fileName),
+                        FilePath = attachFileName,
+                        FileName = Path.GetFileName(attachFileName),
                         MediaType = MediaTypeNames.Application.Pdf
                     }
                 },
@@ -197,7 +171,7 @@ namespace ParserQueueRunner
                 {
                     AddressFrom = "savosin_sergey@mail.ru",
                     AddressTo = "savortone@yandex.ru",
-                    Subject = "--==Тема письма==--",
+                    Subject = mailSubject,
                     BodyText = "--==<b> Тело письма </b>==--"
                 }
             };

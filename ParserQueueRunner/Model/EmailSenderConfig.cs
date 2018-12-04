@@ -6,6 +6,6 @@
         public int port;
         public bool enableSsl;
         public string username;
-        public string pasword;
+        public string password;
     }
 }
