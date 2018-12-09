@@ -26,7 +26,7 @@ namespace ParserQueueRunner
             try
             {
                 var messageParams = _emailParameters.message;
-                var firstAttachmentParams = _emailParameters.attachments.FirstOrDefault();
+                var firstAttachmentParams = _emailParameters.attachments?.FirstOrDefault();
                 using (var message = new MailMessage(messageParams.AddressFrom, messageParams.AddressTo))
                 {
                     message.Subject = messageParams.Subject;

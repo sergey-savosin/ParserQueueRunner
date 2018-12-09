@@ -8,6 +8,6 @@ namespace ParserQueueRunner.Model
 {
     public class WebParserParams
     {
-        string DocumentNumber { get; set; }
+        public string DocumentNumber { get; set; }
     }
 }
