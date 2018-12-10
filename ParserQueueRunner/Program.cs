@@ -24,13 +24,13 @@ namespace ParserQueueRunner
 		{
 			Console.WriteLine("Starting work.");
 
-            string res = CheckExcelAddin();
-            Console.WriteLine("Excel addin check result: {0}", res);
+            //string res = CheckExcelAddin();
+            //Console.WriteLine("Excel addin check result: {0}", res);
 
-            if (!(res.Equals("Ok")))
-            {
-                return;
-            }
+            //if (!(res.Equals("Ok")))
+            //{
+            //    return;
+            //}
 
             int i = 3;
             while (i-- > 0)

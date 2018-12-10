@@ -1,5 +1,7 @@
 ﻿using Microsoft.Win32;
-using Excel = Microsoft.Office.Interop.Excel;
+//using Excel = Microsoft.Office.Interop.Excel;
+using NetOffice;
+using Excel = NetOffice.ExcelApi;
 using ParserQueueRunner.Model;
 using System;
 using System.Collections.Generic;
@@ -29,27 +31,35 @@ namespace ParserQueueRunner
                 ParserError = ""
             };
 
+            Excel.Application xlApp = null;
+
             try
             {
                 Console.WriteLine("Parser test starting. Please wait...");
                 
                 // Application
-                Excel.Application xlApp = new Excel.Application();
+                xlApp = new Excel.Application();
 
                 // открываем Excel файл
                 Excel.Workbook xlWb1 = xlApp.Workbooks.Open(fileNameParser);
 
                 xlApp.Run(@"ParserAddinTest");
-                xlWb1.Close(false); // закрываем книгу без сохранения
-                NAR(xlWb1);
-                xlApp.Quit(); //закрываем Excel
-                NAR(xlApp);
-                GC.Collect();
+                //xlWb1.Close(false); // закрываем книгу без сохранения
+                xlApp.DisposeChildInstances();
+
             }
             catch (Exception exc)
             {
                 result.ParserStatus = "Error";
                 result.ParserError = exc.Message;
+            }
+            finally
+            {
+                if (xlApp != null)
+                {
+                    xlApp.Quit(); //закрываем Excel
+                    xlApp.Dispose();
+                }
             }
 
             return result;
@@ -84,7 +94,7 @@ namespace ParserQueueRunner
                 xlWb2 = xlApp.Workbooks.Add();
 
                 //Excel.Worksheet xlSht = xlWb2.Sheets["Лист1"]; //имя листа в файле
-                xlSht = xlWb2.Sheets[1]; //имя листа в файле
+                xlSht = xlWb2.Sheets[1] as Excel.Worksheet; //имя листа в файле
                 
                 //xlApp.Visible = true;
                 //xlApp.DisplayAlerts = false;
@@ -97,9 +107,9 @@ namespace ParserQueueRunner
 
                 // Запуск парсера
                 var res = xlApp.Run(@"StartParser", parserConfigName);
-                if (!String.IsNullOrEmpty(res))
+                if (!String.IsNullOrEmpty((string)res))
                 {
-                    throw new Exception(res);
+                    throw new Exception((string)res);
                 }
 
                 object row1 = xlSht.Cells[2, "A"].Value;
@@ -109,13 +119,12 @@ namespace ParserQueueRunner
                 }
                 else
                 {
-                    string row3 = xlSht.Cells[2, "C"].Value;
-                    var row3Address = xlSht.Cells[2, "B"].Hyperlinks;
-                    string row3Address2 = xlSht.Cells[2, "B"].Hyperlinks[1].Address;
-                    string row4 = xlSht.Cells[2, "D"].Value;
-                    DateTime row5 = xlSht.Cells[2, "E"].Value;
+                    string row3 = xlSht.Cells[2, "C"].Value.ToString();
+                    string row3Address = xlSht.Cells[2, "B"].Hyperlinks[1].Address;
+                    string row4 = xlSht.Cells[2, "D"].Value.ToString();
+                    DateTime row5 = (DateTime)xlSht.Cells[2, "E"].Value;
 
-                    parserResult.CardUrl = row3Address2;
+                    parserResult.CardUrl = row3Address;
                     parserResult.LastDealDate = row5;
                     parserResult.DocumentPdfUrl = row4;
                     parserResult.HasAttachment = string.IsNullOrEmpty(row4) ? false : true;
@@ -128,29 +137,18 @@ namespace ParserQueueRunner
             }
             finally
             {
-                if (xlSht != null)
-                {
-                    NAR(xlSht);
-                }
-
-                if (xlWb1 != null)
-                {
-                    xlWb1.Close(false);
-                    NAR(xlWb1);
-                }
-
                 if (xlWb2 != null)
                 {
-                    xlWb2.Close(false); //закрываем файл и сохраняем изменения, если не сохранять, то false                
-                    NAR(xlWb2);
+                    xlWb2.Saved = true;
                 }
+
+                xlApp.DisposeChildInstances();
 
                 if (xlApp != null)
                 {
                     xlApp.Quit(); //закрываем Excel
-                    NAR(xlApp);
+                    xlApp.Dispose();
                 }
-                GC.Collect();
             }
 
             return parserResult;
