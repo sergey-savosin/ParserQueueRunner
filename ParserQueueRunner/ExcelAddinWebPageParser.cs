@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace ParserQueueRunner
 {
@@ -65,10 +66,10 @@ namespace ParserQueueRunner
             return result;
         }
 
-        public WebParserResult ParseWebSite(WebParserConfig config, WebParserParams param)
+        public WebParserResult ParseWebSite(WebParserConfig parserConfig, WebParserParams parserParam)
         {
-            string fileNameAddin = config.AddinPath;
-            string parserConfigName = config.AddinConfigName;
+            string fileNameAddin = parserConfig.AddinPath;
+            string parserConfigName = parserConfig.AddinConfigName;
 
             WebParserResult parserResult = new WebParserResult()
             {
@@ -101,7 +102,7 @@ namespace ParserQueueRunner
 
                 xlSht.Cells[1, "B"].Value = "Номер документа";
                 xlSht.Cells[1, "F"].Value = "Обрабатывать";
-                xlSht.Cells[2, "B"].Value = param.DocumentNumber;
+                xlSht.Cells[2, "B"].Value = parserParam.DocumentNumber;
                 xlSht.Cells[2, "F"].Value = "Да";
                 // Заполнение данных на листе
 
@@ -119,15 +120,17 @@ namespace ParserQueueRunner
                 }
                 else
                 {
-                    string row3 = xlSht.Cells[2, "C"].Value.ToString();
-                    string row3Address = xlSht.Cells[2, "B"].Hyperlinks[1].Address;
-                    string row4 = xlSht.Cells[2, "D"].Value.ToString();
-                    DateTime row5 = (DateTime)xlSht.Cells[2, "E"].Value;
+                    string col2HyperlinkAddress = xlSht.Cells[2, "B"].Hyperlinks[1].Address;
+                    string col3 = xlSht.Cells[2, "C"].Value.ToString();
+                    string col4 = xlSht.Cells[2, "D"].Value.ToString();
+                    DateTime col5 = (DateTime)xlSht.Cells[2, "E"].Value;
 
-                    parserResult.CardUrl = row3Address;
-                    parserResult.LastDealDate = row5;
-                    parserResult.DocumentPdfUrl = row4;
-                    parserResult.HasAttachment = string.IsNullOrEmpty(row4) ? false : true;
+                    parserResult.CardUrl = col2HyperlinkAddress;
+                    parserResult.LastDealDate = col5;
+                    parserResult.DocumentPdfUrl = col4;
+                    parserResult.DocumentPdfFolderName = col3;
+                    parserResult.HasAttachment = string.IsNullOrEmpty(col4) ? false : true;
+                    parserResult.DocumentPfdPath = GetDocumentFullPath(parserConfig, parserResult);
                 }
             }
             catch (Exception exc)
@@ -152,6 +155,16 @@ namespace ParserQueueRunner
             }
 
             return parserResult;
+        }
+
+        private string GetDocumentFullPath(WebParserConfig parserConfig, WebParserResult parserResult)
+        {
+            string downloadsFolderName = "Downloads";
+            string addinConfigName = parserConfig.AddinConfigName;
+            string parserDir = Path.GetDirectoryName(parserConfig.AddinPath);
+            string dealName = parserResult.DocumentPdfFolderName;
+            string pdfDocumentName = Path.GetFileName(parserResult.DocumentPdfUrl);
+            return Path.Combine(parserDir, downloadsFolderName, addinConfigName, dealName, pdfDocumentName);
         }
 
         private static void NAR(object o)

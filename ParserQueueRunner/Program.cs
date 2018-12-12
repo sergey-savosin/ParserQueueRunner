@@ -136,7 +136,7 @@ namespace ParserQueueRunner
                 // Отправка Email
                 // ToDo: emailTo брать из очереди
                 // ToDo: файл вложения брать из результата запуска веб-парсера
-                string fileName = "";// @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
+                string fileName = parserResult.DocumentPfdPath;// @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
                 string emailTo = "savortone@yandex.ru";
                 string docNumber = elt.ClientDocNum;
                 DateTime requestDate = elt.CreatedTimeUtc;
@@ -165,42 +165,6 @@ namespace ParserQueueRunner
 			                  elt.ClientDocNum,
 			                  elt.ClientEmail,
 			                  elt.CreatedTimeUtc);
-		}
-
-        //static ParserQueueElement getNewQueueElement_Test()
-        //{
-        //	var elt = new ParserQueueElement()
-        //	{
-        //		ParserQueueId = 1,
-        //		ClientDocNum = "doc#1",
-        //		ClientEmail = "test@mail.ru",
-        //		CreatedTimeUtc = DateTime.Now
-        //	};
-
-        //	return elt;
-        //}
-
-        /// <summary>
-        /// Получить элемент очереди
-        /// </summary>
-        /// <returns>ParserQueueElement</returns>
-        static ParserQueueElement getNewQueueElement_web()
-		{
-            ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
-            {
-                WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
-                Method = "Get",
-                Timeout = 20000,
-                ContentType = "application/json"
-            };
-
-            IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
-            return parserWebQueue.GetNewElement();
-
-		}
-		
-		static void setQueueElementAsProcessed(int ParserQueueId)
-		{
 		}
 
         /// <summary>
