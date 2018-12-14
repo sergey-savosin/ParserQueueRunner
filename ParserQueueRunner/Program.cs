@@ -136,8 +136,8 @@ namespace ParserQueueRunner
                 // Отправка Email
                 // ToDo: emailTo брать из очереди
                 // ToDo: файл вложения брать из результата запуска веб-парсера
-                string fileName = parserResult.DocumentPfdPath;// @"C:\work\assembler\modern-x86-assembly-language-programming-master\9781484200650_AppC.pdf";
-                string emailTo = "savortone@yandex.ru";
+                string fileName = parserResult.DocumentPfdPath;
+                string emailTo = elt.ClientEmail;
                 string docNumber = elt.ClientDocNum;
                 DateTime requestDate = elt.CreatedTimeUtc;
                 sendEmailByNewInterface(fileName, emailTo, docNumber, requestDate, parserResult);
@@ -201,8 +201,8 @@ namespace ParserQueueRunner
             {
                 message = new EmailMessageParameters()
                 {
-                    AddressFrom = "savosin_sergey@mail.ru",
-                    AddressTo = "savortone@yandex.ru",
+                    AddressFrom = senderConfig.username,
+                    AddressTo = AddressTo,
                     Subject = mailSubject,
                     BodyText = mailBody
                 }
