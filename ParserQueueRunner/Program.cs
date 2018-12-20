@@ -97,27 +97,31 @@ namespace ParserQueueRunner
         /// <returns>Кол-во обработанных элементов очереди</returns>
         public static int processQueue()
         {
+            // Создание обработчика очереди
+            ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
+            {
+                WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
+                Method = "Get",
+                Timeout = 20000,
+                ContentType = "application/json"
+            };
+
+            IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
+            ParserQueueElement elt = null;
+
             try
             {
-                // Создание обработчика очереди
-                ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
-                {
-                    WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
-                    Method = "Get",
-                    Timeout = 20000,
-                    ContentType = "application/json"
-                };
-
-                IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
-
                 // Получение элемента очереди
-                var elt = parserWebQueue.GetNewElement();
+                elt = parserWebQueue.GetNewElement();
 
                 if (elt == null)
                 {
                     Console.WriteLine("No new elements to process.");
                     return 0;
                 }
+
+                // Пометка статусом "Взят в обработку"
+                parserWebQueue.SetQueueElementStatus(elt.ParserQueueId, 2);
 
                 // Запустить web-parser
                 Console.WriteLine("Start parsing website for Document Number: {0}", elt.ClientDocNum);
@@ -145,14 +149,20 @@ namespace ParserQueueRunner
                 printParserQueueElement(elt);
 
                 // Пометка элемента очереди как успешно обработанный
-                // ToDo: для ошибок указывать другой статус
-                parserWebQueue.SetQueueElementAsProcessed(elt.ParserQueueId);
+                parserWebQueue.SetQueueElementStatus(elt.ParserQueueId, 3);
 
                 return 1;
             }
             catch (Exception exc)
             {
                 Console.WriteLine("Error: {0}", exc.Message);
+
+                // Установить статус "Ошибка обработки"
+                if (elt != null)
+                {
+                    parserWebQueue.SetQueueElementStatus(elt.ParserQueueId, 4, exc.Message);
+                }
+
             }
             return 0;
 

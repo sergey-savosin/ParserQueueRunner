@@ -46,6 +46,7 @@ namespace ParserQueueRunner
             catch (Exception exc)
             {
                 Console.WriteLine("Compose email error: " + exc.Message);
+                throw exc;
             }
 
         }

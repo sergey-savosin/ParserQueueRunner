@@ -3,6 +3,6 @@
     public interface IParserWebQueue
     {
         ParserQueueElement GetNewElement();
-        void SetQueueElementAsProcessed(int ParserQueueId);
+        void SetQueueElementStatus(int ParserQueueId, int StatusId, string ErrorMessage = "");
     }
 }

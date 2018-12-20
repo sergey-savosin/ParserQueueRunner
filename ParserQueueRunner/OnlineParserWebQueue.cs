@@ -72,13 +72,27 @@ namespace ParserQueueRunner
         }
 
         /// <summary>
-        /// Пометить элемент очереди как успешно обработанный
+        /// Пометить статус элемента очереди
         /// </summary>
         /// <param name="ParserQueueId"></param>
-        public void SetQueueElementAsProcessed(int ParserQueueId)
+        /// <param name="StatusId">
+        /// 1: Новый
+        /// 2: В обработке
+        /// 3: Успешно обработан
+        /// 4: Ошибка обработки
+        /// </param>
+        public void SetQueueElementStatus(int ParserQueueId, int StatusId, string ErrorMessage = "")
         {
             string responseFromServer;
-            string postDataJson = "{ \"queuestatusid\" : \"2\" }";
+            SetQueueElementStatusRequest postData = new SetQueueElementStatusRequest()
+            {
+                queuestatusid = StatusId.ToString(),
+                errormessage = ErrorMessage
+            };
+
+            //string postDataJson = "{ \"queuestatusid\" : \"" + StatusId.ToString() + "\" }";
+            string postDataJson = JsonConvert.SerializeObject(postData);
+
             try
             {
                 string strPutUrl = WEBSERVICE_URL + "/parserqueue/" + ParserQueueId;

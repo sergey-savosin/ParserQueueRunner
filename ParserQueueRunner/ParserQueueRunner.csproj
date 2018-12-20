@@ -94,6 +94,7 @@
     <Compile Include="Model\IWebPageParser.cs" />
     <Compile Include="Model\ParserQueueElement.cs" />
     <Compile Include="Model\ParserWebQueueParameters.cs" />
+    <Compile Include="Model\SetQueueElementStatusRequest.cs" />
     <Compile Include="Model\WebParserConfig.cs" />
     <Compile Include="Model\WebParserParams.cs" />
     <Compile Include="Model\WebParserResult.cs" />
