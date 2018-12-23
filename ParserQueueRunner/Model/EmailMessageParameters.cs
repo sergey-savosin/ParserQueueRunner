@@ -6,5 +6,6 @@
         public string AddressTo;
         public string Subject;
         public string BodyText;
+        public string BodyHtml;
     }
 }

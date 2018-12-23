@@ -8,29 +8,50 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Reflection;
+using System.Security;
+using System.Security.Permissions;
+using System.Security.Policy;
 using System.Text;
 using Newtonsoft.Json;
 using ParserQueueRunner.Model;
+using RazorEngine;
+using RazorEngine.Templating;
 
 namespace ParserQueueRunner
 {
 	class Program
 	{
-		public static void Main(string[] args)
+		public static int Main(string[] args)
 		{
-			Console.WriteLine("Starting work.");
+            if (AppDomain.CurrentDomain.IsDefaultAppDomain())
+            {
+                // RazorEngine cannot clean up from the default appdomain...
+                Console.WriteLine("Switching to secound AppDomain, for RazorEngine...");
+                AppDomainSetup adSetup = new AppDomainSetup();
+                adSetup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+                var current = AppDomain.CurrentDomain;
+                // You only need to add strongnames when your appdomain is not a full trust environment.
+                var strongNames = new StrongName[0];
+
+                var domain = AppDomain.CreateDomain(
+                    "MyMainDomain", null,
+                    current.SetupInformation, new PermissionSet(PermissionState.Unrestricted),
+                    strongNames);
+                var exitCode = domain.ExecuteAssembly(Assembly.GetExecutingAssembly().Location);
+                // RazorEngine will cleanup. 
+                AppDomain.Unload(domain);
+                return exitCode;
+            }
+
+            Console.WriteLine("Starting work.");
 
             //string res = CheckExcelAddin();
-            //Console.WriteLine("Excel addin check result: {0}", res);
-
-            //if (!(res.Equals("Ok")))
-            //{
-            //    return;
-            //}
 
             int i = 3;
             while (i-- > 0)
@@ -42,6 +63,8 @@ namespace ParserQueueRunner
 
             Console.WriteLine("Work finished. Press any key.");
             Console.ReadKey();
+
+            return 0;
         }
 
         /// <summary>
@@ -196,16 +219,16 @@ namespace ParserQueueRunner
                 host = "smtp.mail.ru",
                 port = 587,
                 enableSsl = true,
-                username = "---",
-                password = "---"
+                username = "savosin_sergey@mail.ru",
+                password = "oxygenma0-"
             };
 
             // Тема письма
             string mailSubject = $"--==Документ {DocNumber} от {RequestDate} ==--";
 
             // Тело письма
-
-            string mailBody = ComposeMailTextBody(DocNumber, parserResult);
+            string mailBodyText = ComposeMailTextBody(DocNumber, parserResult);
+            string mailBodyHtml = ComposeMailHtmlBody(DocNumber, parserResult);
 
             EmailParameters emailParameters = new EmailParameters()
             {
@@ -214,7 +237,8 @@ namespace ParserQueueRunner
                     AddressFrom = senderConfig.username,
                     AddressTo = AddressTo,
                     Subject = mailSubject,
-                    BodyText = mailBody
+                    BodyText = mailBodyText,
+                    BodyHtml = mailBodyHtml
                 }
             };
 
@@ -234,6 +258,24 @@ namespace ParserQueueRunner
             IEmailSender emailSender = new OnlineEmailSender(senderConfig);
             IEmailComposer emailComposer = new OnlineEmailComposer(emailParameters, emailSender);
             emailComposer.ComposeAndSendEmail();
+        }
+
+        /// <summary>
+        /// Составитель тела письма (формат Html)
+        /// </summary>
+        /// <param name="docNumber"></param>
+        /// <param name="parserResult"></param>
+        /// <returns>Строка для письма</returns>
+        private static string ComposeMailHtmlBody(string docNumber, WebParserResult parserResult)
+        {
+            string htmlTemplateRelativePath = "MailTemlate\\HtmlTemplate.html";
+            string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string htmlTemplateFullPath = Path.Combine(startupPath, htmlTemplateRelativePath);
+            //string template = "<html><body>Hello @Model.Name, welcome to RazorEngine!</body></html>";
+            string template = File.ReadAllText(htmlTemplateFullPath);
+            string result = Engine.Razor.RunCompile( template, "templateKey", null, new { Name = "Макс" });
+
+            return result;
         }
 
         /// <summary>

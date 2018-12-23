@@ -29,10 +29,22 @@ namespace ParserQueueRunner
                 var firstAttachmentParams = _emailParameters.attachments?.FirstOrDefault();
                 using (var message = new MailMessage(messageParams.AddressFrom, messageParams.AddressTo))
                 {
+                    message.SubjectEncoding = Encoding.UTF8;
                     message.Subject = messageParams.Subject;
+                    message.BodyEncoding = Encoding.UTF8;
                     message.Body = messageParams.BodyText;
-                    message.IsBodyHtml = false;
-                    if (firstAttachmentParams != null)
+                    //message.IsBodyHtml = false;
+                    
+                    // ToDo: использовать messageParams
+                    message.From = new MailAddress("savosin_sergey@mail.ru", "Тестирование ParserQueueRunner", Encoding.UTF8);
+
+                    // Добавление html тела письма
+                    ContentType mimeType = new ContentType("text/html");
+                    AlternateView htmlView = AlternateView.CreateAlternateViewFromString(messageParams.BodyHtml, mimeType);
+                    message.AlternateViews.Add(htmlView);
+
+                    // Добавление одного вложения
+                    if (firstAttachmentParams != null && 1==0)
                     {
                         Attachment data = new Attachment(firstAttachmentParams.FilePath, firstAttachmentParams.MediaType);
                         ContentDisposition disposition = data.ContentDisposition;
