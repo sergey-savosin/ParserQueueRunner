@@ -44,7 +44,7 @@ namespace ParserQueueRunner
                     message.AlternateViews.Add(htmlView);
 
                     // Добавление одного вложения
-                    if (firstAttachmentParams != null && 1==0)
+                    if (firstAttachmentParams != null)
                     {
                         Attachment data = new Attachment(firstAttachmentParams.FilePath, firstAttachmentParams.MediaType);
                         ContentDisposition disposition = data.ContentDisposition;

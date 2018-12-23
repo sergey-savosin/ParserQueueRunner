@@ -32,7 +32,7 @@ namespace ParserQueueRunner
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
             {
                 // RazorEngine cannot clean up from the default appdomain...
-                Console.WriteLine("Switching to secound AppDomain, for RazorEngine...");
+                Console.WriteLine("Switching to second AppDomain, for RazorEngine...");
                 AppDomainSetup adSetup = new AppDomainSetup();
                 adSetup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
                 var current = AppDomain.CurrentDomain;
@@ -219,8 +219,8 @@ namespace ParserQueueRunner
                 host = "smtp.mail.ru",
                 port = 587,
                 enableSsl = true,
-                username = "savosin_sergey@mail.ru",
-                password = "oxygenma0-"
+                username = "---",
+                password = "---"
             };
 
             // Тема письма
@@ -268,10 +268,10 @@ namespace ParserQueueRunner
         /// <returns>Строка для письма</returns>
         private static string ComposeMailHtmlBody(string docNumber, WebParserResult parserResult)
         {
-            string htmlTemplateRelativePath = "MailTemlate\\HtmlTemplate.html";
+            string htmlTemplateRelativePath = "MailTemplate\\HtmlTemplate.html";
             string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             string htmlTemplateFullPath = Path.Combine(startupPath, htmlTemplateRelativePath);
-            //string template = "<html><body>Hello @Model.Name, welcome to RazorEngine!</body></html>";
+
             string template = File.ReadAllText(htmlTemplateFullPath);
             string result = Engine.Razor.RunCompile( template, "templateKey", null, new { Name = "Макс" });
 

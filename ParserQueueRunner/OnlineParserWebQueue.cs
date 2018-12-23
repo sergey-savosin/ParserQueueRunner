@@ -90,7 +90,6 @@ namespace ParserQueueRunner
                 errormessage = ErrorMessage
             };
 
-            //string postDataJson = "{ \"queuestatusid\" : \"" + StatusId.ToString() + "\" }";
             string postDataJson = JsonConvert.SerializeObject(postData);
 
             try
