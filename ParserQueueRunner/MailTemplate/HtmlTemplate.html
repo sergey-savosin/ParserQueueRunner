@@ -22,12 +22,17 @@
     </style>
 </head>
 <body>
-    <h1>The header</h1>
-    For a start.
-    <hr>
-    <p>This is <b>bold text</b>, this is a <a href="http://www.vprofy.ru">hyperlink</a></p>
-
-    Hi @Model.Name.
+    <h1>Информация из электронной картотеки судебных дел.</h1>
+    Добрый день, вы заказывали информацию по номеру дела @Model.DocNumber.
+    <br />
+    @Model.Result
+    <hr />
+    @if(@Model.ParserStatus == "Ok") {
+        <p>Последняя информация по делу от @Model.LastDealDate</p>
+        <p>Ссылка на дело в картотеке: @Model.CardUrl</p>
+        <p>Ссылка на документ: <a href="@Model.DocumentPdfUrl">скачать</a>.</p>
+        <hr />
+    }
 
 </body>
 </html>

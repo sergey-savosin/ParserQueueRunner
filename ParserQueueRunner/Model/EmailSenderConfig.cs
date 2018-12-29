@@ -7,5 +7,6 @@
         public bool enableSsl;
         public string username;
         public string password;
+        public string usernameAlias;
     }
 }

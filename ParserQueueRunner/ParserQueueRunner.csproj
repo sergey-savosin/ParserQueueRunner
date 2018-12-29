@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExcelAddinWebPageParser.cs" />
+    <Compile Include="IniReader.cs" />
     <Compile Include="Model\EmailAttachmentParameters.cs" />
     <Compile Include="Model\EmailMessageParameters.cs" />
     <Compile Include="Model\EmailParameters.cs" />
@@ -147,7 +148,13 @@
     <Content Include="MailTemplate\HtmlTemplate.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="ParserQueueRunner.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Readme.md" />
+    <Content Include="MailTemplate\TextTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resource\Designcontest-Casino-Cherry.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

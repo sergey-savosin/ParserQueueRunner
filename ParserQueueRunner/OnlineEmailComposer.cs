@@ -33,15 +33,20 @@ namespace ParserQueueRunner
                     message.Subject = messageParams.Subject;
                     message.BodyEncoding = Encoding.UTF8;
                     message.Body = messageParams.BodyText;
-                    //message.IsBodyHtml = false;
                     
-                    // ToDo: использовать messageParams
-                    message.From = new MailAddress("savosin_sergey@mail.ru", "Тестирование ParserQueueRunner", Encoding.UTF8);
+                    // Установка алиаса отправителя
+                    if (!string.IsNullOrEmpty(messageParams.AddressFromAlias))
+                    {
+                        message.From = new MailAddress(messageParams.AddressFrom, messageParams.AddressFromAlias, Encoding.UTF8);
+                    }
 
                     // Добавление html тела письма
-                    ContentType mimeType = new ContentType("text/html");
-                    AlternateView htmlView = AlternateView.CreateAlternateViewFromString(messageParams.BodyHtml, mimeType);
-                    message.AlternateViews.Add(htmlView);
+                    if (!string.IsNullOrEmpty(messageParams.BodyHtml))
+                    {
+                        ContentType mimeType = new ContentType("text/html");
+                        AlternateView htmlView = AlternateView.CreateAlternateViewFromString(messageParams.BodyHtml, Encoding.UTF8, "text/html");
+                        message.AlternateViews.Add(htmlView);
+                    }
 
                     // Добавление одного вложения
                     if (firstAttachmentParams != null)

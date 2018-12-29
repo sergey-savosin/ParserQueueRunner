@@ -24,7 +24,7 @@ namespace ParserQueueRunner
 
         public WebParserResult ParserCheck(WebParserConfig parserConfig)
         {
-            string fileNameParser = parserConfig.AddinPath;
+            string fileNameParser = this.GetParserPath();
 
             WebParserResult result = new WebParserResult()
             {
@@ -68,7 +68,8 @@ namespace ParserQueueRunner
 
         public WebParserResult ParseWebSite(WebParserConfig parserConfig, WebParserParams parserParam)
         {
-            string fileNameAddin = parserConfig.AddinPath;
+            string fileNameAddin = this.GetParserPath();
+
             string parserConfigName = parserConfig.AddinConfigName;
 
             WebParserResult parserResult = new WebParserResult()
@@ -96,15 +97,22 @@ namespace ParserQueueRunner
 
                 //Excel.Worksheet xlSht = xlWb2.Sheets["Лист1"]; //имя листа в файле
                 xlSht = xlWb2.Sheets[1] as Excel.Worksheet; //имя листа в файле
-                
+
                 //xlApp.Visible = true;
                 //xlApp.DisplayAlerts = false;
 
-                xlSht.Cells[1, "B"].Value = "Номер документа";
-                xlSht.Cells[1, "F"].Value = "Обрабатывать";
-                xlSht.Cells[2, "B"].Value = parserParam.DocumentNumber;
-                xlSht.Cells[2, "F"].Value = "Да";
-                // Заполнение данных на листе
+                int startRowNumber = parserConfig.StartRowNumber;
+
+                // Вывод заголовка
+                if (startRowNumber > 1)
+                {
+                    xlSht.Cells[1, parserConfig.DealNumberColumn].Value = "Номер документа";
+                    xlSht.Cells[1, parserConfig.IsTrackColumn].Value = "Обрабатывать";
+                }
+
+                // Заполнение исходных данных на листе
+                xlSht.Cells[startRowNumber, parserConfig.DealNumberColumn].Value = parserParam.DocumentNumber;
+                xlSht.Cells[startRowNumber, parserConfig.IsTrackColumn].Value = "Да";
 
                 // Запуск парсера
                 var res = xlApp.Run(@"StartParser", parserConfigName);
@@ -113,24 +121,24 @@ namespace ParserQueueRunner
                     throw new Exception((string)res);
                 }
 
-                object row1 = xlSht.Cells[2, "A"].Value;
+                object row1 = xlSht.Cells[startRowNumber, parserConfig.ResultNumberColumn].Value;
                 if (row1 == null)
                 {
                     parserResult.ParserStatus = "Not found";
                 }
                 else
                 {
-                    string col2HyperlinkAddress = xlSht.Cells[2, "B"].Hyperlinks[1].Address;
-                    string col3 = xlSht.Cells[2, "C"].Value.ToString();
-                    string col4 = xlSht.Cells[2, "D"].Value.ToString();
-                    DateTime col5 = (DateTime)xlSht.Cells[2, "E"].Value;
+                    string col2HyperlinkAddress = xlSht.Cells[startRowNumber, parserConfig.DealNumberHyperlinkColumn].Hyperlinks[1].Address;
+                    string col3 = xlSht.Cells[startRowNumber, parserConfig.DocumentPdfFolderNameColumn].Value.ToString();
+                    string col4 = xlSht.Cells[startRowNumber, parserConfig.DocumentPdfUrlColumn].Value.ToString();
+                    DateTime col5 = (DateTime)xlSht.Cells[startRowNumber, parserConfig.LastDealDateColumn].Value;
 
                     parserResult.CardUrl = col2HyperlinkAddress;
                     parserResult.LastDealDate = col5;
                     parserResult.DocumentPdfUrl = col4;
                     parserResult.DocumentPdfFolderName = col3;
                     parserResult.HasAttachment = string.IsNullOrEmpty(col4) ? false : true;
-                    parserResult.DocumentPfdPath = GetDocumentFullPath(parserConfig, parserResult);
+                    parserResult.DocumentPfdPath = GetDocumentFullPath(parserConfig, parserResult, fileNameAddin);
                 }
             }
             catch (Exception exc)
@@ -157,11 +165,11 @@ namespace ParserQueueRunner
             return parserResult;
         }
 
-        private string GetDocumentFullPath(WebParserConfig parserConfig, WebParserResult parserResult)
+        private string GetDocumentFullPath(WebParserConfig parserConfig, WebParserResult parserResult, string addinFullPath)
         {
             string downloadsFolderName = "Downloads";
             string addinConfigName = parserConfig.AddinConfigName;
-            string parserDir = Path.GetDirectoryName(parserConfig.AddinPath);
+            string parserDir = Path.GetDirectoryName(addinFullPath);
             string dealName = parserResult.DocumentPdfFolderName;
             string pdfDocumentName = Path.GetFileName(parserResult.DocumentPdfUrl);
             return Path.Combine(parserDir, downloadsFolderName, addinConfigName, dealName, pdfDocumentName);

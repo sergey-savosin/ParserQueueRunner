@@ -10,15 +10,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Mail;
 using System.Net.Mime;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 using System.Text;
-using Newtonsoft.Json;
 using ParserQueueRunner.Model;
 using RazorEngine;
 using RazorEngine.Templating;
@@ -51,12 +48,67 @@ namespace ParserQueueRunner
 
             Console.WriteLine("Starting work.");
 
+            // Проверка работы Excel Addin "Parser"
             //string res = CheckExcelAddin();
 
-            int i = 3;
-            while (i-- > 0)
+            string EXE = Assembly.GetExecutingAssembly().GetName().Name;
+            string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string iniFullPath = Path.Combine(startupPath, EXE + ".ini");
+
+            ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters();
+            EmailSenderConfig senderConfig = new EmailSenderConfig();
+            WebParserConfig parserConfig = new WebParserConfig();
+            int nElementsToProcess = 0;
+
+            try
             {
-                int cnt = processQueue();
+                // Считывание настроек программы
+                IniReader iniReader = new IniReader(iniFullPath);
+                string testValue = iniReader.GetValue("test", "section", "10");
+                Console.WriteLine($"Read config file: {iniFullPath}");
+
+                // Program params
+                nElementsToProcess = iniReader.GetIntValue("NumberElementsForProcessing", "Program", 0);
+
+                // WebService parameters
+                parserWebQueueParameters.WebServiceUrl = iniReader.GetValue("WebServiceUrl", "QueueWebService");
+                parserWebQueueParameters.Method = "Get";
+                parserWebQueueParameters.Timeout = iniReader.GetIntValue("Timeout", "QueueWebService", 20000);
+                parserWebQueueParameters.ContentType = "application/json";
+
+                // Email parameters
+                senderConfig.host = iniReader.GetValue("Host", "EmailSender");
+                senderConfig.port = iniReader.GetIntValue("Port", "EmailSender");
+                senderConfig.enableSsl = iniReader.GetBoolValue("EnableSsl", "EmailSender");
+                senderConfig.username = iniReader.GetValue("UserName", "EmailSender");
+                senderConfig.password = iniReader.GetValue("Password", "EmailSender");
+                senderConfig.usernameAlias = iniReader.GetValue("UserNameAlias", "EmailSender");
+
+                // Excel Addin Parser
+                parserConfig.AddinConfigName = iniReader.GetValue("ParserConfigName", "ExcelAddinParser");
+                parserConfig.DealNumberColumn = iniReader.GetValue("DealNumberColumn", "ExcelAddinParser");
+                parserConfig.IsTrackColumn = iniReader.GetValue("IsTrackColumn", "ExcelAddinParser");
+                parserConfig.StartRowNumber = iniReader.GetIntValue("StartRowNumber", "ExcelAddinParser", 2);
+                parserConfig.ResultNumberColumn = iniReader.GetValue("ResultNumberColumn", "ExcelAddinParser");
+                parserConfig.DealNumberHyperlinkColumn = iniReader.GetValue("DealNumberHyperlinkColumn", "ExcelAddinParser");
+                parserConfig.DocumentPdfFolderNameColumn = iniReader.GetValue("DocumentPdfFolderNameColumn", "ExcelAddinParser");
+                parserConfig.DocumentPdfUrlColumn = iniReader.GetValue("DocumentPdfUrlColumn", "ExcelAddinParser");
+                parserConfig.LastDealDateColumn = iniReader.GetValue("LastDealDateColumn", "ExcelAddinParser");
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine($"Can't find ini file at {iniFullPath}.");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error readind ini file: {ex.GetType()}");
+                return 0;
+            }
+
+            while (nElementsToProcess-- > 0)
+            {
+                int cnt = processQueue(parserWebQueueParameters, senderConfig, parserConfig);
                 if (cnt == 0)
                     break;
             }
@@ -76,9 +128,7 @@ namespace ParserQueueRunner
             IWebPageParser webParser = new ExcelAddinWebPageParser();
             WebParserConfig parserConfig = new WebParserConfig()
             {
-                AddinPath = webParser.GetParserPath(),
-                AddinConfigName = "",
-                AddinWorkbookTemplateFile = ""
+                AddinConfigName = ""
             };
             var parserResult = webParser.ParserCheck(parserConfig);
             return parserResult.ParserStatus +
@@ -93,17 +143,10 @@ namespace ParserQueueRunner
         /// </summary>
         /// <param name="documentNumber"></param>
         /// <returns></returns>
-        private static WebParserResult ParseDocument(string documentNumber)
+        private static WebParserResult ParseDocument(WebParserConfig parserConfig, string documentNumber)
         {
-            const string parserConfigName = "Kad.arbitr.ru_r78_doc_05.11.2018";
-
             IWebPageParser webParser = new ExcelAddinWebPageParser();
-            WebParserConfig parserConfig = new WebParserConfig()
-            {
-                AddinPath = webParser.GetParserPath(),
-                AddinConfigName = parserConfigName,
-                AddinWorkbookTemplateFile = ""
-            };
+
             WebParserParams parserParams = new WebParserParams()
             {
                 DocumentNumber = documentNumber
@@ -118,17 +161,10 @@ namespace ParserQueueRunner
         /// Обработка элемента очереди ParserQueue
         /// </summary>
         /// <returns>Кол-во обработанных элементов очереди</returns>
-        public static int processQueue()
+        public static int processQueue(ParserWebQueueParameters parserWebQueueParameters, EmailSenderConfig emailSenderConfig,
+            WebParserConfig webParserConfig)
         {
             // Создание обработчика очереди
-            ParserWebQueueParameters parserWebQueueParameters = new ParserWebQueueParameters()
-            {
-                WebServiceUrl = "https://vprofy.ru/parserqueue/parserqueueendpoint.php",
-                Method = "Get",
-                Timeout = 20000,
-                ContentType = "application/json"
-            };
-
             IParserWebQueue parserWebQueue = new OnlineParserWebQueue(parserWebQueueParameters);
             ParserQueueElement elt = null;
 
@@ -148,7 +184,7 @@ namespace ParserQueueRunner
 
                 // Запустить web-parser
                 Console.WriteLine("Start parsing website for Document Number: {0}", elt.ClientDocNum);
-                WebParserResult parserResult = ParseDocument(elt.ClientDocNum);
+                WebParserResult parserResult = ParseDocument(webParserConfig, elt.ClientDocNum);
 
                 Console.WriteLine("parser result: {0}. Last date: {1}, pdf link: {2}",
                     parserResult.ParserStatus,
@@ -161,13 +197,11 @@ namespace ParserQueueRunner
                 }
 
                 // Отправка Email
-                // ToDo: emailTo брать из очереди
-                // ToDo: файл вложения брать из результата запуска веб-парсера
                 string fileName = parserResult.DocumentPfdPath;
                 string emailTo = elt.ClientEmail;
                 string docNumber = elt.ClientDocNum;
                 DateTime requestDate = elt.CreatedTimeUtc;
-                sendEmailByNewInterface(fileName, emailTo, docNumber, requestDate, parserResult);
+                sendEmailByNewInterface(emailSenderConfig, fileName, emailTo, docNumber, requestDate, parserResult);
 
                 printParserQueueElement(elt);
 
@@ -212,17 +246,8 @@ namespace ParserQueueRunner
         /// 3. Тема письма
         /// 4. Данные для тела письма (Номер документа, дата дела...)
         /// </summary>
-        static void sendEmailByNewInterface(string attachFileName, string AddressTo, string DocNumber, DateTime RequestDate, WebParserResult parserResult)
+        static void sendEmailByNewInterface(EmailSenderConfig senderConfig, string attachFileName, string AddressTo, string DocNumber, DateTime RequestDate, WebParserResult parserResult)
         {
-            EmailSenderConfig senderConfig = new EmailSenderConfig()
-            {
-                host = "smtp.mail.ru",
-                port = 587,
-                enableSsl = true,
-                username = "---",
-                password = "---"
-            };
-
             // Тема письма
             string mailSubject = $"--==Документ {DocNumber} от {RequestDate} ==--";
 
@@ -235,6 +260,7 @@ namespace ParserQueueRunner
                 message = new EmailMessageParameters()
                 {
                     AddressFrom = senderConfig.username,
+                    AddressFromAlias = senderConfig.usernameAlias,
                     AddressTo = AddressTo,
                     Subject = mailSubject,
                     BodyText = mailBodyText,
@@ -272,8 +298,33 @@ namespace ParserQueueRunner
             string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             string htmlTemplateFullPath = Path.Combine(startupPath, htmlTemplateRelativePath);
 
+            string parseMessage = "";
+            switch (parserResult.ParserStatus)
+            {
+                case "Not found":
+                    parseMessage = "Документ не найден. Попробуйте указать другой номер дела.";
+                    break;
+                case "Error":
+                    parseMessage = "Ошибка получения информации.<br>" + parserResult.ParserError;
+                    break;
+                case "Ok":
+                    parseMessage = "Результат:";
+                    break;
+                default:
+                    parseMessage = "Ошибка составления результата.";
+                    break;
+            }
+
             string template = File.ReadAllText(htmlTemplateFullPath);
-            string result = Engine.Razor.RunCompile( template, "templateKey", null, new { Name = "Макс" });
+            string result = Engine.Razor.RunCompile( template, "htmlTemplateKey", null,
+                new {
+                    DocNumber = docNumber,
+                    Result = parseMessage,
+                    LastDealDate = parserResult.LastDealDate.ToShortDateString(),
+                    CardUrl = parserResult.CardUrl,
+                    DocumentPdfUrl = parserResult.DocumentPdfUrl,
+                    ParserStatus = parserResult.ParserStatus
+                });
 
             return result;
         }
@@ -285,6 +336,51 @@ namespace ParserQueueRunner
         /// <param name="parserResult"></param>
         /// <returns>Строка для письма</returns>
         private static string ComposeMailTextBody(string docNumber, WebParserResult parserResult)
+        {
+            string textTemplateRelativePath = "MailTemplate\\TextTemplate.html";
+            string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string textTemplateFullPath = Path.Combine(startupPath, textTemplateRelativePath);
+
+            string parseMessage = "";
+            switch (parserResult.ParserStatus)
+            {
+                case "Not found":
+                    parseMessage = "Документ не найден. Попробуйте указать другой номер дела.";
+                    break;
+                case "Error":
+                    parseMessage = "Ошибка получения информации.<br>" + parserResult.ParserError;
+                    break;
+                case "Ok":
+                    parseMessage = "Результат:";
+                    break;
+                default:
+                    parseMessage = "Ошибка составления результата.";
+                    break;
+            }
+
+            string template = File.ReadAllText(textTemplateFullPath);
+            string result = Engine.Razor.RunCompile(template, "textTemplateKey", null,
+                new
+                {
+                    DocNumber = docNumber,
+                    Result = parseMessage,
+                    LastDealDate = parserResult.LastDealDate.ToShortDateString(),
+                    CardUrl = parserResult.CardUrl,
+                    DocumentPdfUrl = parserResult.DocumentPdfUrl,
+                    ParserStatus = parserResult.ParserStatus
+                });
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// Составитель тела письма (формат Pain Text)
+        /// </summary>
+        /// <param name="docNumber"></param>
+        /// <param name="parserResult"></param>
+        /// <returns>Строка для письма</returns>
+        private static string ComposeMailTextBodyOld(string docNumber, WebParserResult parserResult)
         {
             StringBuilder sbMessageText = new StringBuilder($"Информация по документу № {docNumber}.\r\n");
             sbMessageText.AppendLine("----------------------------\r\n");
