@@ -46,6 +46,7 @@ namespace ParserQueueRunner
                 return exitCode;
             }
 
+            Console.WriteLine("-- ParserQueueRunner, ver 0.2 --");
             Console.WriteLine("Starting work.");
 
             // Проверка работы Excel Addin "Parser"
@@ -114,7 +115,7 @@ namespace ParserQueueRunner
             }
 
             Console.WriteLine("Work finished. Press any key.");
-            Console.ReadKey();
+            //Console.ReadKey();
 
             return 0;
         }
