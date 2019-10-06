@@ -1,10 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-# SharpDevelop 5.1
-VisualStudioVersion = 12.0.20827.3
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserQueueRunner", "ParserQueueRunner\ParserQueueRunner.csproj", "{1BE1EE68-432B-43A2-B03E-93630943E4A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunnerQueueWorker", "RunnerQueueWorker\RunnerQueueWorker.csproj", "{0BDCC49F-B037-4FA0-816A-D7C2C1DC89AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,5 +17,15 @@ Global
 		{1BE1EE68-432B-43A2-B03E-93630943E4A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BE1EE68-432B-43A2-B03E-93630943E4A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BE1EE68-432B-43A2-B03E-93630943E4A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BDCC49F-B037-4FA0-816A-D7C2C1DC89AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BDCC49F-B037-4FA0-816A-D7C2C1DC89AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BDCC49F-B037-4FA0-816A-D7C2C1DC89AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BDCC49F-B037-4FA0-816A-D7C2C1DC89AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA61D639-C76B-40B6-968C-EA66029E31B5}
 	EndGlobalSection
 EndGlobal
