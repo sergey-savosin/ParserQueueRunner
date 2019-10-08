@@ -17,9 +17,6 @@ namespace RunnerQueueWorker
             Console.WriteLine("-- RunnerQueueWorker, ver 0.1 --");
             Console.WriteLine("Starting work.");
 
-            // Проверка работы Excel Addin "Parser"
-            //string res = CheckExcelAddin();
-
             string EXE = Assembly.GetExecutingAssembly().GetName().Name;
             string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             string iniFullPath = Path.Combine(startupPath, EXE + ".ini");
@@ -93,6 +90,7 @@ namespace RunnerQueueWorker
 
                 // ToDo: выполнить команду
                 Console.WriteLine("ToDo:Start runner: {0}", elt.CommandText);
+                CommandTextRunnerResult RunnerResult = RunCommandText(elt.CommandText);
 
 
                 // ToDo: обработка ошибки
@@ -125,5 +123,13 @@ namespace RunnerQueueWorker
 
         }
 
+        private static CommandTextRunnerResult RunCommandText(string commandText)
+        {
+            CommandTextRunnerConfig config = new CommandTextRunnerConfig();
+            CommandTextRunnerParams param = new CommandTextRunnerParams();
+
+            ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
+            return commandTextRunner.Execute(config, param);
+        }
     }
 }

@@ -47,6 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IniReader.cs" />
+    <Compile Include="Model\ICommandTextRunner.cs" />
+    <Compile Include="Model\CommandTextRunnerConfig.cs" />
+    <Compile Include="Model\CommandTextRunnerParams.cs" />
+    <Compile Include="Model\CommandTextRunnerResult.cs" />
     <Compile Include="Model\IRunnerWebQueue.cs" />
     <Compile Include="Model\QueueStatus.cs" />
     <Compile Include="Model\RunnerWebQueueParameters.cs" />
@@ -55,6 +59,7 @@
     <Compile Include="OnlineRunnerWebQueue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WindowsCommandTextRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

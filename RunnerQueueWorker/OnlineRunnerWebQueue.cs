@@ -123,6 +123,14 @@ namespace RunnerQueueWorker
                 }
 
             }
+            catch (WebException ex)
+            {
+                var reader = new StreamReader(ex.Response.GetResponseStream());
+                var content = reader.ReadToEnd();
+
+                Console.WriteLine("Web error: " + content.ToString());
+
+            }
             catch (Exception ex)
             {
                 Console.WriteLine("Exception: " + ex.Message);
