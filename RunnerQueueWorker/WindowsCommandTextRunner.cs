@@ -8,7 +8,7 @@ namespace RunnerQueueWorker
     {
         public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
         {
-            runCommand_normal(param.CommandText);
+            runCommand_cmd(param.CommandText);
 
             return new CommandTextRunnerResult()
             {
@@ -22,8 +22,8 @@ namespace RunnerQueueWorker
         {
             //* Create your Process
             Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c " + commandText;
+            process.StartInfo.FileName = commandText;
+            process.StartInfo.Arguments = "";
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -36,7 +36,10 @@ namespace RunnerQueueWorker
             //* Read the other one synchronously
             string output = process.StandardOutput.ReadToEnd();
             Console.WriteLine("output> " + output);
-            process.WaitForExit();
+
+            bool exited = process.WaitForExit(2000);
+            Console.WriteLine("IsExited> {0}", exited);
+
         }
 
         static void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

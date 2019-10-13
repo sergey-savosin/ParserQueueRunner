@@ -1,10 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RunnerQueueWorker.Model;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
 
 namespace RunnerQueueWorker.Tests
 {
@@ -17,7 +12,7 @@ namespace RunnerQueueWorker.Tests
 
         public CommandTextRunnerTests()
         {
-            runner = new ConsoleAppTextRunner();
+            runner = new WindowsCommandTextRunner();
         }
 
         [TestInitialize]
