@@ -128,10 +128,11 @@ namespace RunnerQueueWorker
             CommandTextRunnerConfig config = new CommandTextRunnerConfig();
             CommandTextRunnerParams param = new CommandTextRunnerParams()
             {
-                CommandText = commandText
+                CommandText = commandText,
+                CommandParameters = ""
             };
 
-            ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
+            ICommandTextRunner commandTextRunner = new ConsoleAppTextRunner();
             return commandTextRunner.Execute(config, param);
         }
     }

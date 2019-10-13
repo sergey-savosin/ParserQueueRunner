@@ -3,3 +3,5 @@
 /.vs
 /packages
 /ParserQueueRunner/ParserQueueRunner.csproj.user
+/RunnerQueueWorker/bin/Debug
+/RunnerQueueWorker/obj/Debug
