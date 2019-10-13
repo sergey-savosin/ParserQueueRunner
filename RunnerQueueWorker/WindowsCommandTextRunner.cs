@@ -8,22 +8,35 @@ namespace RunnerQueueWorker
     {
         public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
         {
-            runCommand_cmd(param.CommandText);
+            string errorText = null;
+            string errorStackTrace = null;
+            int resultCode = 0;
+
+            try
+            {
+                runCommand_cmd(param.CommandText, config.CommandStartTimeout);
+            }
+            catch (Exception ex)
+            {
+                errorText = ex.Message;
+                errorStackTrace = ex.StackTrace;
+                resultCode = -1;
+            }
 
             return new CommandTextRunnerResult()
             {
-                ErrorText = "not implemented",
-                OutputText = "empty",
-                ResultCode = 0
+                ErrorText = errorStackTrace,
+                OutputText = errorText,
+                ResultCode = resultCode
             };
         }
 
-        static void runCommand_cmd(string commandText)
+        static void runCommand_cmd(string commandText, int timeout)
         {
             //* Create your Process
             Process process = new Process();
-            process.StartInfo.FileName = commandText;
-            process.StartInfo.Arguments = "";
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.Arguments = "/c " + commandText;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -37,8 +50,10 @@ namespace RunnerQueueWorker
             string output = process.StandardOutput.ReadToEnd();
             Console.WriteLine("output> " + output);
 
-            bool exited = process.WaitForExit(2000);
+            bool exited = process.WaitForExit(timeout);
             Console.WriteLine("IsExited> {0}", exited);
+
+            //ToDo save output strings
 
         }
 
@@ -48,8 +63,24 @@ namespace RunnerQueueWorker
             Console.WriteLine("error> " + outLine.Data);
         }
 
-        static void runCommand_normal(string commandText)
+        static void runCommand_shell(string commandText, int timeout)
         {
+            //* Create your Process
+            Process process = new Process();
+            process.StartInfo.FileName = commandText;
+            process.StartInfo.Arguments = "";
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.RedirectStandardOutput = false;
+            process.StartInfo.RedirectStandardError = false;
+            //* Start process
+            process.Start();
+            bool exited = process.WaitForExit(timeout);
+
+            if (!exited)
+            {
+                throw new Exception($"Command start timeout: {timeout} ms.");
+            }
+
         }
     }
 }

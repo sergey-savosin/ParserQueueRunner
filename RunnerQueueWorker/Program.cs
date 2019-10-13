@@ -125,7 +125,12 @@ namespace RunnerQueueWorker
 
         private static CommandTextRunnerResult RunCommandText(string commandText)
         {
-            CommandTextRunnerConfig config = new CommandTextRunnerConfig();
+            CommandTextRunnerConfig config = new CommandTextRunnerConfig()
+            {
+                CommandStartTimeout = 30000, //ToDo read value to config.ini
+                GoogleSheetURI = ""
+            };
+
             CommandTextRunnerParams param = new CommandTextRunnerParams()
             {
                 CommandText = commandText,
