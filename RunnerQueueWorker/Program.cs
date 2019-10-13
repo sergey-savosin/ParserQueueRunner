@@ -126,7 +126,10 @@ namespace RunnerQueueWorker
         private static CommandTextRunnerResult RunCommandText(string commandText)
         {
             CommandTextRunnerConfig config = new CommandTextRunnerConfig();
-            CommandTextRunnerParams param = new CommandTextRunnerParams();
+            CommandTextRunnerParams param = new CommandTextRunnerParams()
+            {
+                CommandText = commandText
+            };
 
             ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
             return commandTextRunner.Execute(config, param);

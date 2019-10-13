@@ -1,9 +1,6 @@
 ﻿using RunnerQueueWorker.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace RunnerQueueWorker
 {
@@ -11,12 +8,45 @@ namespace RunnerQueueWorker
     {
         public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
         {
+            runCommand_normal(param.CommandText);
+
             return new CommandTextRunnerResult()
             {
-                ErroreText = "not implemented",
+                ErrorText = "not implemented",
+                OutputText = "empty",
                 ResultCode = 0
             };
         }
 
+        static void runCommand_cmd(string commandText)
+        {
+            //* Create your Process
+            Process process = new Process();
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.Arguments = "/c " + commandText;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            //* Set ONLY ONE handler here.
+            process.ErrorDataReceived += new DataReceivedEventHandler(OutputHandler);
+            //* Start process
+            process.Start();
+            //* Read one element asynchronously
+            process.BeginErrorReadLine();
+            //* Read the other one synchronously
+            string output = process.StandardOutput.ReadToEnd();
+            Console.WriteLine("output> " + output);
+            process.WaitForExit();
+        }
+
+        static void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        {
+            //* Do your stuff with the output (write to console/log/StringBuilder)
+            Console.WriteLine("error> " + outLine.Data);
+        }
+
+        static void runCommand_normal(string commandText)
+        {
+        }
     }
 }

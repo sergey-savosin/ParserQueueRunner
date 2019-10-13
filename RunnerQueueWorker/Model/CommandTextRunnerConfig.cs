@@ -2,6 +2,6 @@
 {
     public class CommandTextRunnerConfig
     {
-        string GoogleSheetURI { get; set; }
+        public string GoogleSheetURI { get; set; }
     }
 }
