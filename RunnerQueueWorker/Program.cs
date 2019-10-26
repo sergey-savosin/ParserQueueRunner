@@ -88,16 +88,16 @@ namespace RunnerQueueWorker
                 // Пометка статусом "Взят в обработку"
                 parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.Processing);
 
-                // ToDo: выполнить команду
-                Console.WriteLine("ToDo:Start runner: {0}", elt.CommandText);
-                CommandTextRunnerResult RunnerResult = RunCommandText(elt.CommandText);
+                // Выполнить команду
+                Console.WriteLine("Starting command: {0}", elt.CommandText);
+                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandText);
 
 
                 // ToDo: обработка ошибки
-                //if (parserResult.ParserStatus != "Ok")
-                //{
-                //    Console.WriteLine("Error: {0}", parserResult.ParserError);
-                //}
+                if (runnerResult.ResultCode != 0)
+                {
+                    Console.WriteLine("Error: {0}. \nStack trace: {1}", runnerResult.OutputText, runnerResult.ErrorText);
+                }
 
 
                 // ToDo: вывести элемент очереди
@@ -137,7 +137,8 @@ namespace RunnerQueueWorker
                 CommandParameters = ""
             };
 
-            ICommandTextRunner commandTextRunner = new ConsoleAppTextRunner();
+            //ICommandTextRunner commandTextRunner = new ConsoleAppTextRunner();
+            ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
             return commandTextRunner.Execute(config, param);
         }
     }

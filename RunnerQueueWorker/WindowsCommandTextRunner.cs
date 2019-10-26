@@ -1,16 +1,20 @@
 ﻿using RunnerQueueWorker.Model;
 using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace RunnerQueueWorker
 {
     public class WindowsCommandTextRunner : ICommandTextRunner
     {
+        static StringBuilder ErrorText = null;
+
         public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
         {
             string errorText = null;
             string errorStackTrace = null;
             int resultCode = 0;
+            ErrorText = new StringBuilder();
 
             try
             {
@@ -20,7 +24,14 @@ namespace RunnerQueueWorker
             {
                 errorText = ex.Message;
                 errorStackTrace = ex.StackTrace;
-                resultCode = -1;
+                resultCode = 1; // runner error
+            }
+
+            // ToDo: странно, что сюда попадаем до получения errorOutput
+            if (resultCode == 0 && ErrorText.Length>0)
+            {
+                resultCode = 2; // execution program error
+                errorText = ErrorText.ToString();
             }
 
             return new CommandTextRunnerResult()
@@ -61,6 +72,7 @@ namespace RunnerQueueWorker
         {
             //* Do your stuff with the output (write to console/log/StringBuilder)
             Console.WriteLine("error> " + outLine.Data);
+            ErrorText.AppendLine(outLine.Data);
         }
 
         static void runCommand_shell(string commandText, int timeout)
