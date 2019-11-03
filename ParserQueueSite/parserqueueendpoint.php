@@ -28,6 +28,52 @@
         return $row;
     }
     
+    function parserQueueInsert($updateParams)
+    {
+        $db = mysqli_connect('localhost', '035496017_mysql', 'password', 'vprofy_parserqueue', 3306);
+        if (mysqli_connect_errno()) {
+            printf("Can not connect to DB: %s\n", mysqli_connect_error());
+            return -1;
+        }
+
+        $dealNumber = $updateParams->dealNumber;
+        $email = $updateParams->email;
+        $newStatusId = 1;
+        
+        if (empty($dealNumber))
+        {
+            printf("Empty Deal Number value in request.");
+            return -1;
+        }
+        
+        if (empty($email))
+        {
+            printf("Empty Email value in request.");
+            return -1;
+        }
+        
+        $stmt = mysqli_prepare($db, "INSERT parserqueue(ClientEmail, ClientDocNum, QueueStatusId) VALUES (?, ?, ?)");
+        if ($stmt)
+        {
+            mysqli_stmt_bind_param($stmt, "ssi", $email, $dealNumber, $newStatusId);
+
+            // insert one row
+            mysqli_stmt_execute($stmt);
+            $newid = mysqli_insert_id($db);
+            
+            mysqli_stmt_close($stmt);
+            mysqli_close($db);
+        }
+        else
+        {
+            printf("Can not do sql prepare");
+            return -1;
+        }
+        
+        return $newid;
+    }
+
+    
     function parserQueueUpdate($updateParams, $resource)
     {
         $db = mysqli_connect('localhost', '035496017_mysql', 'password', 'vprofy_parserqueue', 3306);
@@ -122,6 +168,58 @@
         //console_log('body', $body);
         //console_log('updateParams', $updateParams);
         //console_log('resource', $request);
+
+    }
+    else if ($_SERVER["REQUEST_METHOD"] == "POST")
+    {
+        // Get update parameters
+        $body = file_get_contents('php://input');
+        
+        switch(strtolower($_SERVER["CONTENT_TYPE"]))
+        {
+            case "application/json":
+                $insertParams = json_decode($body);
+                break;
+            case "text/xml":
+                http_response_code(500);
+                break;
+            default:
+                print $_SERVER["CONTENT_TYPE"];
+                http_response_code(500);
+                break;
+        }
+        
+        // Get reqource Id
+        if (!isset($insertParams))
+        {
+            http_response_code(400);
+            printf('Empty on invalid json in request body.');
+            console_log('body', $body);
+
+            exit();
+        }
+        else
+        {
+            // PATH_INFO: "/parserqueue"
+            $request = explode('/', substr($_SERVER['PATH_INFO'], 1));
+
+            // Do update runnerqueue
+            $id = parserQueueInsert($insertParams);
+            if ($id<0)
+            {
+                printf("There is a error.");
+                http_response_code(400);
+                exit();
+            }
+            
+            // Return result
+            $json = json_encode(array('id' => $id));
+            http_response_code(201); // 201: resourse created
+            $site = 'http://vprofy.ru';
+            header("Location: $site/" . $_SERVER['REQUEST_URI'] . "/$id");
+            header("Content-Type: application/json");
+            print $json;
+        }
 
     }
     else

@@ -59,7 +59,16 @@ namespace RunnerQueueWorker
                 RunnerQueueElement el = JsonConvert.DeserializeObject<RunnerQueueElement>(responseFromServer);
                 return el;
             }
-            catch (Exception ex)
+			catch (WebException ex)
+			{
+				var reader = new StreamReader(ex.Response.GetResponseStream());
+				var content = reader.ReadToEnd();
+
+				Console.WriteLine("Web error: " + content.ToString());
+				throw ex;
+			}
+
+			catch (Exception ex)
             {
                 Console.WriteLine("Exception: " + ex.Message);
             }
@@ -134,6 +143,7 @@ namespace RunnerQueueWorker
             catch (Exception ex)
             {
                 Console.WriteLine("Exception: " + ex.Message);
+				throw ex;
             }
 
         }

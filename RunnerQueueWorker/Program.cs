@@ -14,7 +14,7 @@ namespace RunnerQueueWorker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("-- RunnerQueueWorker, ver 0.1 --");
+            Console.WriteLine("-- RunnerQueueWorker, ver 0.2 --");
             Console.WriteLine("Starting work.");
 
             string EXE = Assembly.GetExecutingAssembly().GetName().Name;
@@ -60,8 +60,9 @@ namespace RunnerQueueWorker
                     break;
             }
 
-            Console.WriteLine("Work finished. Press any key.");
-            Console.ReadKey();
+            Console.WriteLine("Work finished.");
+            //Console.WriteLine("Work finished. Press any key.");
+            //Console.ReadKey();
         }
 
         /// <summary>
@@ -96,7 +97,10 @@ namespace RunnerQueueWorker
                 // ToDo: обработка ошибки
                 if (runnerResult.ResultCode != 0)
                 {
-                    Console.WriteLine("Error: {0}. \nStack trace: {1}", runnerResult.OutputText, runnerResult.ErrorText);
+                    Console.WriteLine("Error in main: {0}. \nStack trace: {1}", runnerResult.OutputText, runnerResult.ErrorText);
+					parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.DoneWithError, runnerResult.OutputText);
+					Console.WriteLine("Error saved.");
+					return 0; //stop processing
                 }
 
 
@@ -110,12 +114,13 @@ namespace RunnerQueueWorker
             }
             catch (Exception exc)
             {
-                Console.WriteLine("Error: {0}", exc.Message);
+                Console.WriteLine("Error in main: {0}", exc.Message);
 
                 // Установить статус "Ошибка обработки"
                 if (elt != null)
                 {
                     parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.DoneWithError, exc.Message);
+					Console.WriteLine("Error saved.");
                 }
 
             }

@@ -24,13 +24,13 @@ namespace RunnerQueueWorker
             {
                 errorText = ex.Message;
                 errorStackTrace = ex.StackTrace;
-                resultCode = 1; // runner error
+                resultCode = -2; // runner error
             }
 
             // ToDo: странно, что сюда попадаем до получения errorOutput
-            if (resultCode == 0 && ErrorText.Length>0)
+            if (resultCode == 0 && ErrorText.Length>2)
             {
-                resultCode = 2; // execution program error
+                resultCode = -1; // execution program error
                 errorText = ErrorText.ToString();
             }
 

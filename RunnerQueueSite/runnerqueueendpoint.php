@@ -17,7 +17,7 @@
     	SELECT RunnerQueueId, CommandText,
     	    CONVERT_TZ(  `CreatedTime` , @@session.time_zone ,  '+00:00' ) AS `CreatedTimeUtc`,
     	    QueueStatusId
-    	FROM runnerqueue WHERE QueueStatusId <> 3 /* Done */ LIMIT 1";
+    	FROM runnerqueue WHERE QueueStatusId = 1 /* New */ LIMIT 1";
     	
     	$result = mysqli_query($db, $sql, MYSQLI_USE_RESULT);
     
@@ -66,7 +66,13 @@
 
     function runnerQueueUpdate($updateParams, $resource)
     {
-        $db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_parserqueue', 3306);
+        $db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_runnerqueue', 3306);
+        //$db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_parserqueue', 3306);
+        if (mysqli_connect_errno()) {
+            printf("Can not connect to DB: %s\n", mysqli_connect_error());
+            return 500;
+        }
+        
         $newStatusValue = $updateParams->queuestatusid;
         $newErrorMessageValue = "'".addslashes($updateParams->errormessage)."'";
         
@@ -92,10 +98,9 @@
         
         mysqli_close($db);
         
-        console_log('sql', $sql);
-        console_log('$updateParams', $updateParams);
-        console_log('sql error', $sqlerror);
         console_log('rows', $affectedRows);
+        console_log('new status', $newStatusValue);
+        console_log('error text', $newErrorMessageValue);
 
         if ($result)
         {
@@ -103,6 +108,9 @@
         }
         else
         {
+        // console_log('sql', $sql);
+        // console_log('$updateParams', $updateParams);
+            console_log('sql error', $sqlerror);
             return 500; //error
         }
         
@@ -152,7 +160,7 @@
         }
         else
         {
-            http_response_code(404); // 404 bad request
+            http_response_code($result); // 404 bad request
         }
         
         //console_log('body', $body);
@@ -190,7 +198,7 @@
         }
         else
         {
-            // PATH_INFO: "/runnerqueue"
+            // PATH_INFO: "/parserqueue"
             $request = explode('/', substr($_SERVER['PATH_INFO'], 1));
 
             // Do update runnerqueue

@@ -1,5 +1,4 @@
 ﻿using RunnerQueueWorker.Model;
-using SlavaGu.ConsoleAppLauncher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,29 +11,29 @@ namespace RunnerQueueWorker
     {
         public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
         {
-            ConsoleApp app = new ConsoleApp(param.CommandText, param.CommandParameters);
-            List<string> cmdOutput = new List<string>();
-            app.ConsoleOutput += (o, args) =>
-            {
-                cmdOutput.Add(args.Line);
-            };
-            app.Run();
-            var exited = app.WaitForExit(2000); // 2 second to wait
+            //ConsoleApp app = new ConsoleApp(param.CommandText, param.CommandParameters);
+            //List<string> cmdOutput = new List<string>();
+            //app.ConsoleOutput += (o, args) =>
+            //{
+            //    cmdOutput.Add(args.Line);
+            //};
+            //app.Run();
+            //var exited = app.WaitForExit(2000); // 2 second to wait
 
-            string strOutput = String.Join("; ", cmdOutput.ToArray());
+            //string strOutput = String.Join("; ", cmdOutput.ToArray());
 
-            Console.WriteLine("IsExited: {0}", exited);
-            Console.WriteLine("ExitCode: {0}", app.ExitCode);
-            Console.WriteLine("Result:" + strOutput);
+            //Console.WriteLine("IsExited: {0}", exited);
+            //Console.WriteLine("ExitCode: {0}", app.ExitCode);
+            //Console.WriteLine("Result:" + strOutput);
 
-            var res = new CommandTextRunnerResult()
-            {
-                OutputText = strOutput,
-                ResultCode = app.ExitCode.Value,
-                ErrorText = "no errors"
-            };
+            //var res = new CommandTextRunnerResult()
+            //{
+            //    OutputText = strOutput,
+            //    ResultCode = app.ExitCode.Value,
+            //    ErrorText = "no errors"
+            //};
 
-            return res;
+            return null;
         }
     }
 }
