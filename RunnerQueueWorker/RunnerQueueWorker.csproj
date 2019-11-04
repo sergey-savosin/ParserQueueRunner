@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleAppTextRunner.cs" />
+    <Compile Include="Function\FileDownloader.cs" />
     <Compile Include="IniReader.cs" />
     <Compile Include="Model\ICommandTextRunner.cs" />
     <Compile Include="Model\CommandTextRunnerConfig.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\CommandTextRunnerTests.cs" />
+    <Compile Include="Tests\FileDownloaderTests.cs" />
     <Compile Include="WindowsCommandTextRunner.cs" />
   </ItemGroup>
   <ItemGroup>

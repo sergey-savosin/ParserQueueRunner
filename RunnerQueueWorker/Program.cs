@@ -62,7 +62,7 @@ namespace RunnerQueueWorker
 
             Console.WriteLine("Work finished.");
             //Console.WriteLine("Work finished. Press any key.");
-            //Console.ReadKey();
+            Console.ReadKey();
         }
 
         /// <summary>

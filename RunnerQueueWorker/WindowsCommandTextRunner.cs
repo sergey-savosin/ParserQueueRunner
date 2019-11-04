@@ -59,10 +59,10 @@ namespace RunnerQueueWorker
             process.BeginErrorReadLine();
             //* Read the other one synchronously
             string output = process.StandardOutput.ReadToEnd();
-            Console.WriteLine("output> " + output);
+            //Console.WriteLine("output> " + output);
 
             bool exited = process.WaitForExit(timeout);
-            Console.WriteLine("IsExited> {0}", exited);
+            //Console.WriteLine("IsExited> {0}", exited);
 
             //ToDo save output strings
 
@@ -71,7 +71,7 @@ namespace RunnerQueueWorker
         static void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             //* Do your stuff with the output (write to console/log/StringBuilder)
-            Console.WriteLine("error> " + outLine.Data);
+            //Console.WriteLine("error> " + outLine.Data);
             ErrorText.AppendLine(outLine.Data);
         }
 
