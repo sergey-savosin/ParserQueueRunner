@@ -1,12 +1,8 @@
 ﻿using RunnerQueueWorker.Model;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RunnerQueueWorker
 {
@@ -14,7 +10,7 @@ namespace RunnerQueueWorker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("-- RunnerQueueWorker, ver 0.2 --");
+            Console.WriteLine("-- RunnerQueueWorker, ver 0.3 --");
             Console.WriteLine("Starting work.");
 
             string EXE = Assembly.GetExecutingAssembly().GetName().Name;
@@ -140,7 +136,7 @@ namespace RunnerQueueWorker
 
 				CommandTextRunnerParams param = new CommandTextRunnerParams()
 				{
-					CommandText = commandText,
+					CommandText = parameter1,
 					CommandParameters = ""
 				};
 
