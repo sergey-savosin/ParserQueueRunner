@@ -62,7 +62,7 @@ namespace RunnerQueueWorker
 
             Console.WriteLine("Work finished.");
             //Console.WriteLine("Work finished. Press any key.");
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace RunnerQueueWorker
 
                 // Выполнить команду
                 Console.WriteLine("Starting command: {0}", elt.CommandText);
-                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandText);
+                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandText, elt.Parameter1, elt.Parameter2);
 
 
                 // ToDo: обработка ошибки
@@ -128,23 +128,29 @@ namespace RunnerQueueWorker
 
         }
 
-        private static CommandTextRunnerResult RunCommandText(string commandText)
+        private static CommandTextRunnerResult RunCommandText(string commandText, string parameter1, string parameter2)
         {
-            CommandTextRunnerConfig config = new CommandTextRunnerConfig()
-            {
-                CommandStartTimeout = 30000, //ToDo read value to config.ini
-                GoogleSheetURI = ""
-            };
+			if (commandText == "RunProgram")
+			{
+				CommandTextRunnerConfig config = new CommandTextRunnerConfig()
+				{
+					CommandStartTimeout = 30000, //ToDo read value to config.ini
+					GoogleSheetURI = ""
+				};
 
-            CommandTextRunnerParams param = new CommandTextRunnerParams()
-            {
-                CommandText = commandText,
-                CommandParameters = ""
-            };
+				CommandTextRunnerParams param = new CommandTextRunnerParams()
+				{
+					CommandText = commandText,
+					CommandParameters = ""
+				};
 
-            //ICommandTextRunner commandTextRunner = new ConsoleAppTextRunner();
-            ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
-            return commandTextRunner.Execute(config, param);
+				ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
+				return commandTextRunner.Execute(config, param);
+			}
+			else
+			{
+				throw new ArgumentException("CommandText not supported: " + commandText, "CommandText");
+			}
         }
     }
 }
