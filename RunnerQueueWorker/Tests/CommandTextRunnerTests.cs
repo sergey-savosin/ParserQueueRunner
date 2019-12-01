@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RunnerQueueWorker.Function;
 using RunnerQueueWorker.Model;
 
 namespace RunnerQueueWorker.Tests

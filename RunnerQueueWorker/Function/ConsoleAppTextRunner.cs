@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RunnerQueueWorker
+namespace RunnerQueueWorker.Function
 {
     public class ConsoleAppTextRunner : ICommandTextRunner
     {

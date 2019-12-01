@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace RunnerQueueWorker
+namespace RunnerQueueWorker.Function
 {
     public class WindowsCommandTextRunner : ICommandTextRunner
     {

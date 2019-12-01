@@ -73,24 +73,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleAppTextRunner.cs" />
+    <Compile Include="Function\ConsoleAppTextRunner.cs" />
     <Compile Include="Function\FileDownloader.cs" />
-    <Compile Include="IniReader.cs" />
+    <Compile Include="Utils\IniReader.cs" />
     <Compile Include="Model\ICommandTextRunner.cs" />
     <Compile Include="Model\CommandTextRunnerConfig.cs" />
     <Compile Include="Model\CommandTextRunnerParams.cs" />
     <Compile Include="Model\CommandTextRunnerResult.cs" />
     <Compile Include="Model\IRunnerWebQueue.cs" />
     <Compile Include="Model\QueueStatus.cs" />
+    <Compile Include="Model\RunApplicationParameters.cs" />
     <Compile Include="Model\RunnerWebQueueParameters.cs" />
     <Compile Include="Model\RunnerQueueElement.cs" />
     <Compile Include="Model\SetQueueElementStatusRequest.cs" />
-    <Compile Include="OnlineRunnerWebQueue.cs" />
+    <Compile Include="Utils\OnlineRunnerWebQueue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\CommandTextRunnerTests.cs" />
     <Compile Include="Tests\FileDownloaderTests.cs" />
-    <Compile Include="WindowsCommandTextRunner.cs" />
+    <Compile Include="Function\WindowsCommandTextRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

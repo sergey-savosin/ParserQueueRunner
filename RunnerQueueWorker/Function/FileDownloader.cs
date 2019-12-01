@@ -23,20 +23,24 @@ namespace RunnerQueueWorker.Function
 			_startupPath = startupPath;
 		}
 
-		public void Download(string remoteUri, string fileName, string backupDirName)
+		public void Download(string remoteUri, string fileName, string targetDirPath)
 		{
-			Console.WriteLine("Startup path: {0}", _startupPath);
+			Console.WriteLine("[FileDownloader] Startup path: {0}", _startupPath);
 
-			Console.WriteLine("Check backup dir");
-			string backupDirPath = Path.Combine(_startupPath, backupDirName);
-			EnsureBackupDirectory(backupDirPath);
+			if (string.IsNullOrEmpty(targetDirPath))
+			{
+				targetDirPath = _startupPath;
+			}
 
-			Console.WriteLine("Making a backup");
-			string filePath = Path.Combine(_startupPath, fileName);
-			BackupCurrentFile(filePath, backupDirPath);
+			Console.WriteLine("[FileDownloader] Check target dir: {0}", targetDirPath);
+			EnsureDirectoryExists(targetDirPath);
 
-			Console.WriteLine("Starting download a file");
-			DownloadAFile(remoteUri, fileName, _startupPath);
+			//Console.WriteLine("[FileDownloader] Making a backup");
+			//string filePath = Path.Combine(_startupPath, fileName);
+			//BackupCurrentFile(filePath, backupDirPath);
+
+			Console.WriteLine("[FileDownloader] Starting download a file: {0} from URI: {1}", fileName, remoteUri);
+			DownloadAFile(remoteUri, fileName, targetDirPath);
 
 		}
 
@@ -45,7 +49,7 @@ namespace RunnerQueueWorker.Function
 			return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
 		}
 
-		public static void EnsureBackupDirectory(string dirPath)
+		public static void EnsureDirectoryExists(string dirPath)
 		{
 			Directory.CreateDirectory(dirPath);
 		}

@@ -1,4 +1,7 @@
-﻿using RunnerQueueWorker.Model;
+﻿using Newtonsoft.Json;
+using RunnerQueueWorker.Function;
+using RunnerQueueWorker.Model;
+using RunnerQueueWorker.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -17,7 +20,7 @@ namespace RunnerQueueWorker
             string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             string iniFullPath = Path.Combine(startupPath, EXE + ".ini");
 
-            RunnerWebQueueParameters parserWebQueueParameters = new RunnerWebQueueParameters();
+            var parserWebQueueParameters = new RunnerWebQueueParameters();
             //ToDo: implement GoogeSheet downloader + archivator
             //WebParserConfig parserConfig = new WebParserConfig();
             int nElementsToProcess = 0;
@@ -33,8 +36,7 @@ namespace RunnerQueueWorker
                 nElementsToProcess = iniReader.GetIntValue("NumberElementsForProcessing", "Program", 0);
 
                 // WebService parameters
-                parserWebQueueParameters.WebServiceUrl = iniReader.GetValue("WebServiceUrl", "QueueWebService");
-                parserWebQueueParameters.Method = "Get";
+                parserWebQueueParameters.NewElementUrl = iniReader.GetValue("NewElementUrl", "QueueWebService");
                 parserWebQueueParameters.Timeout = iniReader.GetIntValue("Timeout", "QueueWebService", 20000);
                 parserWebQueueParameters.ContentType = "application/json";
             }
@@ -86,8 +88,8 @@ namespace RunnerQueueWorker
                 parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.Processing);
 
                 // Выполнить команду
-                Console.WriteLine("Starting command: {0}", elt.CommandText);
-                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandText, elt.Parameter1, elt.Parameter2);
+                Console.WriteLine("Starting command: {0}, params: {1}", elt.CommandName, elt.CommandParameters);
+                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandName, elt.CommandParameters);
 
 
                 // ToDo: обработка ошибки
@@ -124,10 +126,13 @@ namespace RunnerQueueWorker
 
         }
 
-        private static CommandTextRunnerResult RunCommandText(string commandText, string parameter1, string parameter2)
+        private static CommandTextRunnerResult RunCommandText(string commandName, string commandParametersJson)
         {
-			if (commandText == "RunProgram")
+			if (commandName == "RunApplication")
 			{
+				RunApplicationParameters runParams = JsonConvert.DeserializeObject<RunApplicationParameters>(commandParametersJson);
+
+
 				CommandTextRunnerConfig config = new CommandTextRunnerConfig()
 				{
 					CommandStartTimeout = 30000, //ToDo read value to config.ini
@@ -136,16 +141,20 @@ namespace RunnerQueueWorker
 
 				CommandTextRunnerParams param = new CommandTextRunnerParams()
 				{
-					CommandText = parameter1,
+					CommandText = runParams.ApplicationPath,
 					CommandParameters = ""
 				};
 
 				ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
 				return commandTextRunner.Execute(config, param);
 			}
+			else if (commandName == "DownloadGoogleSheet")
+			{
+				throw new NotSupportedException("CommandName not supported: " + commandName);
+			}
 			else
 			{
-				throw new ArgumentException("CommandText not supported: " + commandText, "CommandText");
+				throw new NotSupportedException("CommandName not supported: " + commandName);
 			}
         }
     }

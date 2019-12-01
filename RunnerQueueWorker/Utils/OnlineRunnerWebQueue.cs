@@ -5,12 +5,12 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace RunnerQueueWorker
+namespace RunnerQueueWorker.Utils
 {
     public class OnlineRunnerWebQueue : IRunnerWebQueue
     {
         readonly string WEBSERVICE_URL;
-        readonly string _method;
+        //readonly string _method;
         readonly int _timeout;
 		readonly string _contentType;
 
@@ -20,8 +20,8 @@ namespace RunnerQueueWorker
         /// <param name="parameters"></param>
         public OnlineRunnerWebQueue(RunnerWebQueueParameters parameters)
         {
-            WEBSERVICE_URL = parameters.WebServiceUrl;
-            _method = parameters.Method;
+            WEBSERVICE_URL = parameters.NewElementUrl;
+            //_method = parameters.Method;
             _timeout = parameters.Timeout;
             _contentType = parameters.ContentType;
         }
@@ -38,7 +38,7 @@ namespace RunnerQueueWorker
             try
             {
                 WebRequest request = WebRequest.Create(WEBSERVICE_URL);
-                request.Method = _method;
+                request.Method = "Get";
                 request.Timeout = _timeout;
                 request.ContentType = _contentType;
 
@@ -78,7 +78,7 @@ namespace RunnerQueueWorker
         }
 
         /// <summary>
-        /// Пометить статус элемента очереди
+        /// Изменить статус элемента очереди
         /// </summary>
         /// <param name="RunnerQueueId"></param>
         /// <param name="queueStatus">
@@ -92,15 +92,15 @@ namespace RunnerQueueWorker
             string responseFromServer;
             SetQueueElementStatusRequest postData = new SetQueueElementStatusRequest()
             {
-                queuestatusid = ((int)queueStatus).ToString(),
-                errormessage = ErrorMessage
+                QueueStatusId = ((int)queueStatus).ToString(),
+                ErrorMessage = ErrorMessage
             };
 
             string postDataJson = JsonConvert.SerializeObject(postData);
 
             try
             {
-                string strPutUrl = WEBSERVICE_URL + "/runnerqueue/" + RunnerQueueId;
+                string strPutUrl = WEBSERVICE_URL + "/" + RunnerQueueId;
                 byte[] byteArray = Encoding.UTF8.GetBytes(postDataJson);
 
                 WebRequest request = WebRequest.Create(strPutUrl);

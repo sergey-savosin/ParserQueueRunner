@@ -8,9 +8,8 @@ namespace RunnerQueueWorker.Model
 	public class RunnerQueueElement
 	{
 		public int RunnerQueueId;
-		public string CommandText;
-		public string Parameter1;
-		public string Parameter2;
+		public string CommandName;
+		public string CommandParameters;
         public DateTime CreatedTimeUtc;
         public int QueueStatusId;
 	}
