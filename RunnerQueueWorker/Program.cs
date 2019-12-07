@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using RunnerQueueWorker.Function;
+using RunnerQueueWorker.Function.Model;
 using RunnerQueueWorker.Model;
 using RunnerQueueWorker.Utils;
 using System;
@@ -13,23 +14,18 @@ namespace RunnerQueueWorker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("-- RunnerQueueWorker, ver 0.3 --");
+            Console.WriteLine("-- RunnerQueueWorker, ver 0.4 --");
             Console.WriteLine("Starting work.");
 
-            string EXE = Assembly.GetExecutingAssembly().GetName().Name;
-            string startupPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            string iniFullPath = Path.Combine(startupPath, EXE + ".ini");
+			string iniFullPath = PathUtils.GetApplicationIniPath();
 
             var parserWebQueueParameters = new RunnerWebQueueParameters();
-            //ToDo: implement GoogeSheet downloader + archivator
-            //WebParserConfig parserConfig = new WebParserConfig();
             int nElementsToProcess = 0;
 
             try
             {
                 // Считывание настроек программы
                 IniReader iniReader = new IniReader(iniFullPath);
-                string testValue = iniReader.GetValue("test", "section", "10");
                 Console.WriteLine($"Read config file: {iniFullPath}");
 
                 // Program params
@@ -89,21 +85,17 @@ namespace RunnerQueueWorker
 
                 // Выполнить команду
                 Console.WriteLine("Starting command: {0}, params: {1}", elt.CommandName, elt.CommandParameters);
-                CommandTextRunnerResult runnerResult = RunCommandText(elt.CommandName, elt.CommandParameters);
+                RunWebCommandResult runnerResult = RunWebCommand(elt.CommandName, elt.CommandParameters);
 
 
                 // ToDo: обработка ошибки
                 if (runnerResult.ResultCode != 0)
                 {
                     Console.WriteLine("Error in main: {0}. \nStack trace: {1}", runnerResult.OutputText, runnerResult.ErrorText);
-					parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.DoneWithError, runnerResult.OutputText);
+					parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.DoneWithError, runnerResult.ErrorText);
 					Console.WriteLine("Error saved.");
 					return 0; //stop processing
                 }
-
-
-                // ToDo: вывести элемент очереди
-                //printParserQueueElement(elt);
 
                 // Пометка элемента очереди как успешно обработанный
                 parserWebQueue.SetQueueElementStatus(elt.RunnerQueueId, QueueStatus.Done);
@@ -126,31 +118,25 @@ namespace RunnerQueueWorker
 
         }
 
-        private static CommandTextRunnerResult RunCommandText(string commandName, string commandParametersJson)
+        private static RunWebCommandResult RunWebCommand(string commandName, string commandParametersJson)
         {
 			if (commandName == "RunApplication")
 			{
 				RunApplicationParameters runParams = JsonConvert.DeserializeObject<RunApplicationParameters>(commandParametersJson);
 
-
-				CommandTextRunnerConfig config = new CommandTextRunnerConfig()
+				if (runParams.CommandStartTimeoutMS == 0)
 				{
-					CommandStartTimeout = 30000, //ToDo read value to config.ini
-					GoogleSheetURI = ""
-				};
+					runParams.CommandStartTimeoutMS = 30000;
+				}
 
-				CommandTextRunnerParams param = new CommandTextRunnerParams()
-				{
-					CommandText = runParams.ApplicationPath,
-					CommandParameters = ""
-				};
-
-				ICommandTextRunner commandTextRunner = new WindowsCommandTextRunner();
-				return commandTextRunner.Execute(config, param);
+				IRunApplication commandTextRunner = new WindowsCommandTextRunner();
+				return commandTextRunner.Execute(runParams);
 			}
-			else if (commandName == "DownloadGoogleSheet")
+			else if (commandName == "DownloadFile")
 			{
-				throw new NotSupportedException("CommandName not supported: " + commandName);
+				var downloadParams = JsonConvert.DeserializeObject<FileDownloaderParams>(commandParametersJson);
+				FileDownloader fd = new FileDownloader();
+				return fd.Download(downloadParams.RemoteUri, downloadParams.FileName, downloadParams.TargetDirPath);
 			}
 			else
 			{

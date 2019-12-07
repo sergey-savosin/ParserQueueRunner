@@ -1,6 +1,6 @@
-﻿namespace RunnerQueueWorker.Model
+﻿namespace RunnerQueueWorker.Function.Model
 {
-    public class CommandTextRunnerResult
+    public class RunWebCommandResult
     {
         public int ResultCode { get; set; }
         public string ErrorText { get; set; }

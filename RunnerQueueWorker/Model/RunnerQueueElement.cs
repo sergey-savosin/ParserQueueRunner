@@ -10,7 +10,7 @@ namespace RunnerQueueWorker.Model
 		public int RunnerQueueId;
 		public string CommandName;
 		public string CommandParameters;
-        public DateTime CreatedTimeUtc;
+        public DateTime CreatedTime;
         public int QueueStatusId;
 	}
 }

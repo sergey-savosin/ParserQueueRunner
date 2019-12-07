@@ -1,4 +1,5 @@
-﻿using RunnerQueueWorker.Model;
+﻿using RunnerQueueWorker.Function.Model;
+using RunnerQueueWorker.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace RunnerQueueWorker.Function
 {
-    public class ConsoleAppTextRunner : ICommandTextRunner
+    public class ConsoleAppTextRunner : IRunApplication
     {
-        public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
+        public RunWebCommandResult Execute(RunApplicationParameters param)
         {
             //ConsoleApp app = new ConsoleApp(param.CommandText, param.CommandParameters);
             //List<string> cmdOutput = new List<string>();

@@ -1,15 +1,16 @@
-﻿using RunnerQueueWorker.Model;
+﻿using RunnerQueueWorker.Function.Model;
+using RunnerQueueWorker.Model;
 using System;
 using System.Diagnostics;
 using System.Text;
 
 namespace RunnerQueueWorker.Function
 {
-    public class WindowsCommandTextRunner : ICommandTextRunner
+    public class WindowsCommandTextRunner : IRunApplication
     {
         static StringBuilder ErrorText = null;
 
-        public CommandTextRunnerResult Execute(CommandTextRunnerConfig config, CommandTextRunnerParams param)
+        public RunWebCommandResult Execute(RunApplicationParameters parameters)
         {
             string errorText = null;
             string errorStackTrace = null;
@@ -18,7 +19,12 @@ namespace RunnerQueueWorker.Function
 
             try
             {
-                runCommand_cmd(param.CommandText, config.CommandStartTimeout);
+				if (string.IsNullOrWhiteSpace(parameters.ApplicationPath))
+				{
+					throw new ArgumentNullException("ApplicationPath");
+				}
+
+                runCommand_cmd(parameters.ApplicationPath, parameters.CommandStartTimeoutMS);
             }
             catch (Exception ex)
             {
@@ -34,10 +40,10 @@ namespace RunnerQueueWorker.Function
                 errorText = ErrorText.ToString();
             }
 
-            return new CommandTextRunnerResult()
+            return new RunWebCommandResult()
             {
-                ErrorText = errorStackTrace,
-                OutputText = errorText,
+                ErrorText = errorText,
+                OutputText = errorStackTrace,
                 ResultCode = resultCode
             };
         }

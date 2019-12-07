@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RunnerQueueWorker.Function.Model;
+using RunnerQueueWorker.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +17,7 @@ namespace RunnerQueueWorker.Function
 
 		public FileDownloader()
 		{
-			_startupPath = GetStartupPath();
+			_startupPath = PathUtils.GetStartupPath();
 		}
 
 		public FileDownloader(string startupPath)
@@ -23,7 +25,7 @@ namespace RunnerQueueWorker.Function
 			_startupPath = startupPath;
 		}
 
-		public void Download(string remoteUri, string fileName, string targetDirPath)
+		public RunWebCommandResult Download(string remoteUri, string fileName, string targetDirPath)
 		{
 			Console.WriteLine("[FileDownloader] Startup path: {0}", _startupPath);
 
@@ -40,13 +42,36 @@ namespace RunnerQueueWorker.Function
 			//BackupCurrentFile(filePath, backupDirPath);
 
 			Console.WriteLine("[FileDownloader] Starting download a file: {0} from URI: {1}", fileName, remoteUri);
-			DownloadAFile(remoteUri, fileName, targetDirPath);
+			try
+			{
+				DownloadAFile(remoteUri, fileName, targetDirPath);
+			}
+			catch (WebException webEx)
+			{
+				return new RunWebCommandResult()
+				{
+					ResultCode = -1,
+					ErrorText = webEx.Message + " " + webEx.InnerException.Message
+				};
+			}
+			catch (Exception ex)
+			{
+				return new RunWebCommandResult()
+				{
+					ResultCode = -1,
+					ErrorText = ex.Message + ". " + ex.InnerException.Message
+				};
+			}
 
-		}
+			Console.WriteLine("[FileDownloader] File downloaded.");
 
-		public static string GetStartupPath()
-		{
-			return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+			return new RunWebCommandResult()
+			{
+				ResultCode = 0,
+				ErrorText = "Ok",
+				OutputText = "Output ok"
+			};
+
 		}
 
 		public static void EnsureDirectoryExists(string dirPath)
