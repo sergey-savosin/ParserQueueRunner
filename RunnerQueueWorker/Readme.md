@@ -16,6 +16,14 @@ BODY:
 Проверка выполнения элеметна в очереди:
 GET https://vprofy.ru/runnerqueue/index.php/NewElement
 
+ImportFromGoogleSheet
+---------------------
+CredentialsFileNamePath = "credentials.json"
+ApplicationName = "Google Sheets API .NET Quickstart"
+SpreadsheetId = "1DVVmqRWVTn4nQkwVOd5VOucQ_L4fTT4S3EiVR-W13qA"
+ImportRange = "Sheet1!A2:E";
+ExcelInsertRange
+
 ## Сценарии ошибок
 - не указана команда
 - не найден файл?
