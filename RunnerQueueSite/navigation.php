@@ -7,14 +7,14 @@
         width: 700px; border: thick double blue; margin-left: auto;
         margin-right: auto; text-align: center; font-size: x-large; padding: .5em;
         font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-        color: darkgreen; background-image: url("border.png");
+        color: darkgreen; background-image: url("Resources/border.png");
         background-size: contain; margin-top: 0;
     }
 </style>
 <nav>
-    <div class="navheader">- Выполнение команд через очередь -</div>
+    <div class="navheader">- Р’С‹РїРѕР»РЅРµРЅРёРµ РєРѕРјР°РЅРґ С‡РµСЂРµР· РѕС‡РµСЂРµРґСЊ -</div>
 	<ul>
-		<li><a href="insert.php">Добавить заявку</a></li>
-		<li><a href="select.php">Просмотр очереди</a></li>
+		<li><a href="insert.php">Р”РѕР±Р°РІРёС‚СЊ Р·Р°СЏРІРєСѓ</a></li>
+		<li><a href="select.php">РџСЂРѕСЃРјРѕС‚СЂ РѕС‡РµСЂРµРґРё</a></li>
 	</ul>
 </nav>

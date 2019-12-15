@@ -37,11 +37,17 @@
 <?php
 	require('navigation.php');
 ?>
-<p>Заявки в очереди (последние 10):</p>
+<p>Р—Р°СЏРІРєРё РІ РѕС‡РµСЂРµРґРё (РїРѕСЃР»РµРґРЅРёРµ 10):</p>
 <div class="oblock">
     <div class="dtable">
 	<div class="dheader">
-        <div class="dcell">ID</div><div class="dcell">Команда</div><div class="dcell">Статус</div><div class="dcell">Ошибка</div><div class="dcell">Создана</div><div class="dcell">Модифицирована</div>
+        <div class="dcell">ID</div>
+        <div class="dcell">РљРѕРјР°РЅРґР°</div>
+        <div class="dcell">РџР°СЂР°РјРµС‚СЂС‹</div>
+        <div class="dcell">РЎС‚Р°С‚СѓСЃ</div>
+        <div class="dcell">РћС€РёР±РєР°</div>
+        <div class="dcell">РЎРѕР·РґР°РЅР°</div>
+        <div class="dcell">РњРѕРґРёС„РёС†РёСЂРѕРІР°РЅР°</div>
 	</div>
 	<?php
 		$db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_runnerqueue', 3306);
@@ -52,27 +58,34 @@
             $statusId = htmlspecialchars($row['QueueStatusId']);
             switch ($statusId) {
                 case "1":
-                    $statusName = 'Новая заявка';
+                    $statusName = 'РќРѕРІР°СЏ Р·Р°СЏРІРєР°';
 		            break;
                 case "2":
-                    $statusName = 'Обрабатывается';
+                    $statusName = 'РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ';
 		            break;
                 case "3":
-                    $statusName = 'Выполнено успешно';
+                    $statusName = 'Р’С‹РїРѕР»РЅРµРЅРѕ СѓСЃРїРµС€РЅРѕ';
 		            break;
                 case "4":
-                    $statusName = 'Выполнено с ошибкой';
+                    $statusName = 'Р’С‹РїРѕР»РЅРµРЅРѕ СЃ РѕС€РёР±РєРѕР№';
 		            break;
                 default:
-                    $statusName = 'Неизвестно';
+                    $statusName = 'РќРµРёР·РІРµСЃС‚РЅРѕ';
 		    }
 		    
 			printf('<div class="drow">
-			    <div class="dcell">%s</div><div class="dcell">%s</div><div class="dcell">%s</div><div class="dcell">%s</div><div class="dcell">%s</div><div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
+			    <div class="dcell">%s</div>
 				</div>
 ',
 				htmlspecialchars($row['RunnerQueueId']),
-				htmlspecialchars($row['CommandText']),
+				htmlspecialchars($row['CommandName']),
+				htmlspecialchars($row['CommandParameters']),
 				$statusName,
 				htmlspecialchars($row['ErrorText']),
 				htmlspecialchars($row['CreatedTime']),

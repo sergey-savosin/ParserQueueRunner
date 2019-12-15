@@ -14,7 +14,7 @@
     	$db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_runnerqueue', 3306);
 
     	$sql = "
-    	SELECT RunnerQueueId, CommandText,
+    	SELECT RunnerQueueId, CommandText, Parameter1, Parameter2,
     	    CONVERT_TZ(  `CreatedTime` , @@session.time_zone ,  '+00:00' ) AS `CreatedTimeUtc`,
     	    QueueStatusId
     	FROM runnerqueue WHERE QueueStatusId = 1 /* New */ LIMIT 1";
@@ -36,17 +36,24 @@
             return -1;
         }
 
-        $commandtext = $updateParams->commandtext;
+        $commandtext = $updateParams->CommandText;
+        $parameter1 = $updateParams->Parameter1;
+        $parameter2 = $updateParams->Parameter2;
         if (empty($commandtext))
         {
-            printf("Empty commandtext value in Request.");
+            printf("Empty CommandText value in Request.");
+            return -1;
+        }
+        if (empty($parameter1))
+        {
+            printf("Empty Parameter1 value in Request.");
             return -1;
         }
         
-        $stmt = mysqli_prepare($db, "INSERT INTO runnerqueue (CommandText) VALUES (?)");
+        $stmt = mysqli_prepare($db, "INSERT INTO runnerqueue (CommandText, Parameter1, Parameter2) VALUES (?,?,?)");
         if ($stmt)
         {
-            mysqli_stmt_bind_param($stmt, "s", $commandtext);
+            mysqli_stmt_bind_param($stmt, "sss", $commandtext, $parameter1, $parameter2);
     
             // insert one row
             mysqli_stmt_execute($stmt);
@@ -67,7 +74,6 @@
     function runnerQueueUpdate($updateParams, $resource)
     {
         $db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_runnerqueue', 3306);
-        //$db = mysqli_connect('localhost', '035496017_mysql2', 'password', 'vprofy_parserqueue', 3306);
         if (mysqli_connect_errno()) {
             printf("Can not connect to DB: %s\n", mysqli_connect_error());
             return 500;
@@ -170,7 +176,7 @@
     }
     else if ($_SERVER["REQUEST_METHOD"] == "POST")
     {
-        // Get update parameters
+        // Get inserting parameters
         $body = file_get_contents('php://input');
         
         switch(strtolower($_SERVER["CONTENT_TYPE"]))
@@ -191,7 +197,7 @@
         if (!isset($insertParams))
         {
             http_response_code(400);
-            printf('Empty on invalid json in request body.');
+            printf('Empty or invalid json in request body.');
             console_log('body', $body);
 
             exit();
