@@ -138,6 +138,12 @@ namespace RunnerQueueWorker
 				FileDownloader fd = new FileDownloader();
 				return fd.Download(downloadParams.RemoteUri, downloadParams.FileName, downloadParams.TargetDirPath);
 			}
+			else if (commandName == "ImportFromGoogleSheetToExcel")
+			{
+				var importGSParams = JsonConvert.DeserializeObject<ImportFromGoogleSheetParameters>(commandParametersJson);
+				var igs = new ImportFromGoogleSheetToExcel();
+				return igs.Execute(importGSParams);
+			}
 			else
 			{
 				throw new NotSupportedException("CommandName not supported: " + commandName);

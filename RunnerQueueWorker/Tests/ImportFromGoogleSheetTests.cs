@@ -25,7 +25,9 @@ namespace RunnerQueueWorker.Tests
 			};
 
 			var result = import.Execute(importParameters);
-			//Assert.IsNotNull(result);
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(0, result.ResultCode);
 		}
 	}
 }

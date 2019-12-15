@@ -63,7 +63,10 @@ namespace RunnerQueueWorker.Function
 			}
 			//Console.Read();
 
-			return null;
+			return new RunWebCommandResult()
+			{
+				ResultCode = 0
+			};
 		}
 	}
 }

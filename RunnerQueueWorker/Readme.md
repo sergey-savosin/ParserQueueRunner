@@ -20,7 +20,7 @@ ImportFromGoogleSheet
 ---------------------
 CredentialsFileNamePath = "credentials.json"
 ApplicationName = "Google Sheets API .NET Quickstart"
-SpreadsheetId = "1DVVmqRWVTn4nQkwVOd5VOucQ_L4fTT4S3EiVR-W13qA"
+SpreadsheetId = "xxx"
 ImportRange = "Sheet1!A2:E";
 ExcelInsertRange
 
