@@ -25,7 +25,10 @@ namespace RunnerQueueWorker.Function
 		{
 			GoogleCredential credential;
 
-			credential = GoogleCredential.FromFile("credentials.json").CreateScoped(Scopes);
+			credential = GoogleCredential
+				.FromFile(importParameters.CredentialsFileNamePath)
+				.CreateScoped(Scopes);
+			
 			// Create Google Sheets API service.
 			var service = new SheetsService(new BaseClientService.Initializer()
 			{
@@ -34,13 +37,13 @@ namespace RunnerQueueWorker.Function
 			});
 
 			// Define request parameters.
-			String spreadsheetId = "1DVVmqRWVTn4nQkwVOd5VOucQ_L4fTT4S3EiVR-W13qA";
-			String range = "Sheet1!A2:E";
+			string spreadsheetId = importParameters.SpreadsheetId;
+			string range = importParameters.ImportRange;
 			SpreadsheetsResource.ValuesResource.GetRequest request =
 					service.Spreadsheets.Values.Get(spreadsheetId, range);
 
 			ValueRange response = request.Execute();
-			IList<IList<Object>> values = response.Values;
+			IList<IList<object>> values = response.Values;
 			if (values != null && values.Count > 0)
 			{
 				Console.WriteLine("- Reading data from Google sheet: -");

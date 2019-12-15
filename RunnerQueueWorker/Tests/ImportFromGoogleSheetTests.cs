@@ -17,7 +17,12 @@ namespace RunnerQueueWorker.Tests
 		{
 			var import = new ImportFromGoogleSheetToExcel();
 			var importParameters = new ImportFromGoogleSheetParameters()
-			{ };
+			{
+				SpreadsheetId = "1DVVmqRWVTn4nQkwVOd5VOucQ_L4fTT4S3EiVR-W13qA",
+				ImportRange = "Sheet1!A1:E",
+				CredentialsFileNamePath = @"C:\git\ParserQueueRunner\credentials.json",
+				ExcelInsertRange = ""
+			};
 
 			var result = import.Execute(importParameters);
 			//Assert.IsNotNull(result);

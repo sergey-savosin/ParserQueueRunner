@@ -5,3 +5,4 @@
 /ParserQueueRunner/ParserQueueRunner.csproj.user
 /RunnerQueueWorker/bin/Debug
 /RunnerQueueWorker/obj/Debug
+/credentials.json
